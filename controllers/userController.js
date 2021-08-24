@@ -27,6 +27,7 @@ exports.crearUsuario = async (req, res) => {
     user.password = await bcryptjs.hash(password, salt);
 
     //CREANDO EL USUARIO
+    
     await user.save();
 
     //CREAR Y FIRMAR EL JWT
@@ -46,6 +47,7 @@ exports.crearUsuario = async (req, res) => {
       (error, token) => {
         if (error) throw error;
         res.json({ token: token, msg: "Usuario Creado Correctamente" });
+       // console.log(token)
       }
     );
 
@@ -59,11 +61,11 @@ exports.crearUsuario = async (req, res) => {
     //     res.redirect('/windspots')
     // })
 
-    // res.json({ msg: "Usuario Creado Correctamente" });
+     res.json({ msg: "Usuario Creado Correctamente" });
   } catch (error) {
     // req.flash ('errors', e.message)
     // res.redirect('register')
     res.status(400).send("Error en el sistema");
   }
-  console.log(registeredUser)
+  //console.log(registeredUser)
 };

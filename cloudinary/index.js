@@ -10,13 +10,13 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
  const storage = new CloudinaryStorage ({
     cloudinary: cloudinary,
     params:{
-        folder: 'ProductosMarket',
+        folder: 'ProductosMarketV2',
         allowedFormats : ['jpeg', 'png', 'jpg']
     }
     
 });
 
-module.exports ={
+module.exports = {
     cloudinary,
     storage
 }

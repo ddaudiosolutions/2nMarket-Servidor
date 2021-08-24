@@ -1,24 +1,28 @@
 const Producto = require("../models/ProductoModel");
 const { validationResult } = require("express-validator");
-const {cloudinary} = require('../cloudinary')
-
+//const {cloudinary} = require('../cloudinary')
 
 exports.crearProducto = async (req, res) => {
+  
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
+
     //CREAR UN PRODUCTO
-    const producto = new Producto(req.body);
+    const producto = new Producto(req.body, req.file);
+    console.log(producto)  
+
     
     //GUARDAR EL CREADOR VIA JWT
-    //producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO 
-
+    producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO 
+    
     //guardamos el proyecto
      producto.save();
-    res.json(producto);
+     //res.send(producto)
+     res.json(producto);
     console.log(producto)
   } catch (error) {
     console.log(error);
@@ -29,7 +33,21 @@ exports.crearProducto = async (req, res) => {
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
   try {
+    //console.log('hola' + ' ' + req.user.id)
     const productos = await Producto.find({}).sort({ creado: -1 });
+    //console.log(productos)
+    res.json({ productos });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Hubo un Error");
+  }
+};
+
+exports.obtenerProductosUser = async (req, res) => {
+  try {
+    //console.log('hola' + ' ' + req.user.id)
+    const productos = await Producto.find({'author': req.user.id}).sort({creado: -1});
+    console.log(productos)
     res.json({ productos });
   } catch (error) {
     console.log(error);
@@ -38,10 +56,12 @@ exports.obtenerProductos = async (req, res) => {
 };
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
-exports.obtenerProducto = async (req, res) => {
+exports.obtenerProductoId = async (req, res) => {
   try {
-    const producto = await Producto.findById(req.params.id);
-    res.json({ producto });
+    const productoId = await Producto.findById(req.params.id);
+   
+    res.json({ productoId });
+   // console.log(productoId)
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -49,9 +69,9 @@ exports.obtenerProducto = async (req, res) => {
 };
 
 //EDITAR UN PROYECTO
-exports.editarProducto = async (req, res) => { 
+exports.editarProductoUser = async (req, res) => { 
 
-  const { id } = req.params;
+  const {id } = req.params;
   console.log(req.body);
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
@@ -61,34 +81,19 @@ exports.editarProducto = async (req, res) => {
 
   //OBTENER LA INFORMACION DEL PROYECTO PARA EDITAR
 
-    // const {title, description, price, categoria, subCategoria} = req.body
-    // const nuevoProducto = {}
-
-    // if(title){
-    //     nuevoProducto.title = title
-    // }
-    // if(description){
-    //     nuevoProducto.description = description
-    // }
-    // if(price){
-    //     nuevoProducto.price = price
-    // }
-    // if(categoria){
-    //     nuevoProducto.categoria = categoria
-    // }
-    // if(subCategoria){
-    //     nuevoProducto.subCategoria = subCategoria
-    // }
-
+    
   try {
     //REVISAR EL ID
     let producto = await Producto.findById(id);
+    console.log(producto)
     //SI EL PRODUCTO EXISTE O NO!!!
     if (!producto) {
+      console.log('hay un error en edicion')
       return res.status(404).json({ msg: "Proyecto no encontrado" });
+      
     }
-    console.log(producto.author.toString())
-    console.log(req.user.id)
+    //console.log(producto.author.toString())
+    //console.log(req.user.id)
 
     //Verificar el PRODUCTO
     if (producto.author.toString() !== req.user.id) {
@@ -129,13 +134,13 @@ exports.eliminarProducto = async (req, res) => {
       if (!producto) {
         return res.status(404).json({ msg: "Proyecto no encontrado" });
       }
-      // console.log(producto.author.toString())
-      // console.log(req.user.id)
+       console.log(producto.author.toString())
+      console.log(req.user.id)
   
       //Verificar el PRODUCTO
-      // if (producto.author.toString() !== req.user.id) {
-      //   return res.status(401).json({ msg: "No Autorizado para Eliminar" });
-      // }
+      if (producto.author.toString() !== req.user.id) {
+        return res.status(401).json({ msg: "No Autorizado para Eliminar" });
+       }
   
       //ELIMINAR EL PRODUCTO
       // producto = await Producto.findByIdAndUpdate({_id: id}, { $set: nuevoProducto}, {new:true});

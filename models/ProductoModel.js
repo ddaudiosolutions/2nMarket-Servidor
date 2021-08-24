@@ -14,14 +14,15 @@ ImageSchema.virtual('thumbnail').get(function(){
 })
 
 //DEBEMOS USAR ESTA OPTS PARA QUE LOS ELEMENTOS VIRTUALES DE MONGO PUEDAN USARSE DEL LADO DEL CLIENTE.
-const opts ={ toJSON: {virtuals: true}};
+//const opts ={ toJSON: {virtuals: true}};
 
 const windproductSchema = new Schema({
     title: {
         type: String,           
       },
 
-    images: [ImageSchema],
+      images: [ImageSchema],
+    // images: [ImageSchema],
     description: {
         type: String,  
       },
@@ -33,8 +34,8 @@ const windproductSchema = new Schema({
       },
     subCategoria: {
         type: String,
-        required: true,
-        trim: true,
+        //required: true,
+        //trim: true,
         
       },
     author: {
@@ -48,6 +49,6 @@ const windproductSchema = new Schema({
 
 
     
-}, opts)
+})
 
-module.exports = mongoose.model('WindProduct', windproductSchema)
+module.exports = mongoose.model('WindProducts', windproductSchema)

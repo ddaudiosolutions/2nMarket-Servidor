@@ -28,11 +28,12 @@ exports.autenticarUser = async (req, res) => {
     //SI TODO ES CORRECTO (EMAIL Y PASSWORD), GENERAMOS EL JWT
     //CREAR Y FIRMAR EL JWT
     const payload = {
-      user: {
-        id: user.id,
+      user: {   
+             id: user.id,
+        
       },
     };
-    
+   // console.log('hola' + ' ' + user.id)
     jwt.sign(
       payload,
       process.env.SECRETA,
@@ -48,3 +49,15 @@ exports.autenticarUser = async (req, res) => {
     console.log(error);
   }
 };
+
+//Obtiene que usuario esta autenticado
+exports.usuarioAutenticado = async (req, res) => {
+  try {
+      const user = await User.findById(req.user.id).select('-password');
+      res.json({user});
+      //console.log(user)
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({msg: 'Hubo un error'});
+  }
+}
