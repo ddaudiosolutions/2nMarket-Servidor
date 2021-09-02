@@ -2,13 +2,15 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 
-const windproductSchema = new Schema({
+const windfoilproductSchema = new Schema({
     title: {
         type: String,           
       },
-     images: {
-       type: String,
-     },
+     images: [{
+       url: String,
+       filename: String
+       
+     }],
     description: {
         type: String,  
       },
@@ -36,4 +38,4 @@ const windproductSchema = new Schema({
     
 })
 
-module.exports = mongoose.model('WindProducts', windproductSchema)
+module.exports = mongoose.model('WindFoilProducts', windfoilproductSchema)

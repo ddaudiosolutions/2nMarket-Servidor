@@ -1,11 +1,11 @@
 const express = require('express');
-const multer = require('multer')
+
 const conectarDB = require ('./config/db')
 const cors = require ('cors')
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
-
+const path = require('path');
 //4 CONECTAMOS A LA BASE DE DATOS
 conectarDB();
 
@@ -26,7 +26,7 @@ app.use('/api/usuarios', require('./routes/usersRoutes'))//PARA CREAR USUARIOS
 app.use('/api/auth', require('./routes/auth'))//PARA AUTENTICAR USUARIOS
 app.use('/api/productos', require('./routes/productos'))// PARA MANEJAR LOS PRODUCTOS
 // //DEFINIR LA PAGINA PRINCIPAL
-
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //3 ARRAMCAMOS SERVIDOR
 app.listen(PORT, () => {
