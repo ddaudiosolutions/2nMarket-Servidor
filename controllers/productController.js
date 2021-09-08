@@ -1,6 +1,7 @@
 const Producto = require("../models/ProductModel");
 const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
+const mongoose = require("mongoose");
 
 exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -35,6 +36,7 @@ exports.obtenerProductos = async (req, res) => {
   try {
     const productos = await Producto.find({}).sort({ creado: -1 });
     res.json({ productos });
+    //console.log(productos)
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -58,7 +60,7 @@ exports.obtenerProductosUser = async (req, res) => {
 exports.obtenerProductoId = async (req, res) => {
   try {
     const productoId = await Producto.findById(req.params.id);
-    //console.log(productoId.images)
+    console.log(productoId);
     res.json({ productoId });
   } catch (error) {
     console.log(error);
@@ -67,75 +69,79 @@ exports.obtenerProductoId = async (req, res) => {
 };
 
 //OBTENER PRODUCTO EDITAR
-exports.obtenerProductoEditar = async (req,res) => {
+exports.obtenerProductoEditar = async (req, res) => {
   try {
-    const productoEditarId = await Producto.findById(req.params.id);
-   // console.log('el producto :' + productoEditarId)
-    res.json({productoEditarId});
-  } catch (error) {
-    console.log(error)
-    res.status(500).send('Hubo un Error')
-    
-  }
-}
-
-//EDITAR UN PRODUCTO
-exports.editarProductoUser = async (req, res) => {
-   
-  console.log("hola antes del primer print");
-  // const {id} = req.params
-  // console.log('el id es:  ' + id)
- 
-  //   //REVISAR SI HAY ERRORES
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  //CREAMOS EL NUEVO OBJETO PARA EDITAR A PARTIR DE LOS VALORES EDITADOS EN EL FORMULARIO
-  let newData = {    
-    categoria: req.body.categoria,
-    subCategoria: req.body.subCategoria,
-    title: req.body.title,
-    price: req.body.price,
-    description: req.body.description,
-    images: {     
-      url: req.file.path,
-      filename: req.file.filename,
-    },
-  };
-
-  try {
-    //   //REVISAR EL ID
-    let producto = await Producto.findById(req.params.id);
-  // console.log(producto);
-
-    //   //SI EL PRODUCTO EXISTE O NO!!!
-    if (!producto) {
-      console.log("hay un error en edicion");
-      return res.status(404).json({ msg: "Producto no encontrado" });
-    }
-
-    // //   //Verificar el PRODUCTO
-    if (producto.author.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "No Autorizado para Editar" });
-    }
-
-    //ACTUALIZAR PRODUCTO
-
-    producto = await Producto.findByIdAndUpdate(
-      { _id: req.params.id }, 
-      { $set: newData },
-      { new: true }
-    );
-    console.log(producto);
+    const producto = await Producto.findById(req.params.id);
+    //res.json(req.body)
+    console.log("el producto :" + producto);
     res.json({ producto });
-    //await producto.save()
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
   }
 };
+
+//EDITAR UN PRODUCTO
+exports.editarProductoUser = async (req, res, next) => {
+  //REVISAR SI HAY ERRORES
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  console.log(typeof(req.file))
+// if (Object.keys(req.file.filename).length === 0) {doc.productImage = doc.productImage;}
+//else {doc.productImage = req.file.filename}
+  let dataBody = {
+    categoria: req.body.categoria,
+    subCategoria: req.body.subCategoria,
+    title: req.body.title,
+    price: req.body.price,
+    description: req.body.description,
+    ...(typeof(req.file)!=="undefined" && {
+      images: {
+        url: req.file.path,
+        filename: req.file.filename,
+      }
+    }),
+  };
+
+  
+
+  try {
+    //   //REVISAR EL ID
+    const productoTest = await Producto.findById(req.params.id);
+    // console.log('TEAT: '  + productoTest.images)
+
+    //   //SI EL PRODUCTO EXISTE O NO!!!
+    if (!productoTest) {
+      console.log("hay un error en edicion");
+      return res.status(404).json({ msg: "Producto no encontrado" });
+    }
+
+    // //   //Verificar el PRODUCTO
+    if (productoTest.author.toString() !== req.user.id) {
+      return res.status(401).json({ msg: "No Autorizado para Editar" });
+    }
+
+    //ACTUALIZAR PRODUCTO
+
+    const producto = await Producto.findByIdAndUpdate(
+      req.params.id,
+      { $set: dataBody },
+      { new: true }
+    );
+
+    res.json({ producto });
+    // await producto.save()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Hubo un Error");
+  }
+};
+
+
+
 //
 //ELIMINAR UN PRODUCTO
 exports.eliminarProducto = async (req, res) => {
@@ -175,7 +181,7 @@ exports.eliminarProducto = async (req, res) => {
             errors: err,
           });
         }
-        console.log(res);
+        // console.log(res);
       }
     );
 

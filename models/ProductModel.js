@@ -17,6 +17,9 @@ const windfoilproductSchema = new Schema({
     price: {
         type: Number,     
               },
+    contacto: {
+      type: String,
+    },
     categoria: {
         type: String,               
       },

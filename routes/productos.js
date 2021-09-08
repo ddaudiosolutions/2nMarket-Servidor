@@ -18,8 +18,7 @@ const { parser} = require ('../cloudinary')
 //api/productos
 router.post(
   "/",
-  auth, 
-  
+  auth,   
  parser.single('images'),   
   // [
   //   check("title", "El nombre es obligatorio").not().isEmpty(),
@@ -44,26 +43,24 @@ router.get("/user",
 auth, 
 productController.obtenerProductosUser);
 
-
-
-
 //OBTENER UN PRODUCTO
 router.get('/:id',
 auth,
 productController.obtenerProductoId);
 
 //MOSTRAR PRODUCTO EDITAR
-// router.get("/user/editar/:id", 
-// auth, 
-// productController.obtenerProductoEditar);
+router.get("/user/editar/:id", 
+auth, 
+productController.obtenerProductoEditar);
 
 //ACTUALIZAR PRODUCTOS DE USUARIO
 router.put("/user/editar/:id", 
 auth, 
-//(req,res)=>{(console.log('producto : ' + req.body._id))},
 parser.single('images'),
+productController.editarProductoUser,
 
-productController.editarProductoUser);
+//productController.obtenerProductoEditar,
+);
 
 
 
