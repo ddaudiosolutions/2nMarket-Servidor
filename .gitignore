@@ -16,4 +16,4 @@
 .env.test.local
 .env.production.local
 
-.variables.env
+.variables.env.env
