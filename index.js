@@ -29,6 +29,6 @@ app.use('/api/productos', require('./routes/productos'))// PARA MANEJAR LOS PROD
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //3 ARRAMCAMOS SERVIDOR
-app.listen(port, '0.0.0.0', () => {
+app.listen(port,  () => {
     console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
 })
