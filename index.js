@@ -18,7 +18,7 @@ app.use(express.urlencoded({extended:true}))
 //app.use(multer())
     
 //2 PUERTO DE LA APP
-const PORT = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
+const port = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
 
 app.use(cors())
 //IMPORTAR RUTAS
@@ -29,6 +29,6 @@ app.use('/api/productos', require('./routes/productos'))// PARA MANEJAR LOS PROD
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //3 ARRAMCAMOS SERVIDOR
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Corriendo SERVIDOR en PORT:  ${PORT}`)
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
 })
