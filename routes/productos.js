@@ -19,29 +19,34 @@ const { parser} = require ('../cloudinary')
 router.post(
   "/",
   auth,   
- parser.single('images'),   
-  // [
-  //   check("title", "El nombre es obligatorio").not().isEmpty(),
-  //   check("description", "Introduce una pequeña descripción").not().isEmpty(),
-  //   check("description", "La descripción debe tener al menos 10 caracteres").isLength({min:10, max:2000}),
-  //   check("price", "El precio es obligatorio").not().isEmpty(),
-  //   check("categoria", "Selecciona una Categoria").not().isEmpty(),
-  //   check("subCategoria", "Selecciona una SubCategoria").not().isEmpty(),
+  
+  [
+    check("title", "El nombre es obligatorio").not().isEmpty(),
+    check("description", "Introduce una pequeña descripción").not().isEmpty(),
+    check("description", "La descripción debe tener al menos 10 caracteres").isLength({min:10, max:2000}),
+    check("price", "El precio es obligatorio").not().isEmpty(),
+    check("categoria", "Selecciona una Categoria").not().isEmpty(),
+    check("subCategoria", "Selecciona una SubCategoria").not().isEmpty(),
+    check("contacto", "Deja un contacto válido").not().isEmpty(),
+    check("images", "Debes subir una images").not().isBase64()
     
-  // ],
+  ],
+  parser.single('images'),  
   
   productController.crearProducto
 );
-
-//OBTENER TODOS LOS PRODUCTOS
-router.get("/", 
-auth, 
-productController.obtenerProductos);
 
 //OBTENER PRODUCTOS USER
 router.get("/user", 
 auth, 
 productController.obtenerProductosUser);
+
+//OBTENER TODOS LOS PRODUCTOS
+router.get("/:busqueda", 
+auth, 
+productController.obtenerProductos);
+
+
 
 //OBTENER UN PRODUCTO
 router.get('/:id',

@@ -7,7 +7,7 @@ exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).send({ errors: errors.array() });
   }
 
   try {
@@ -24,32 +24,41 @@ exports.crearProducto = async (req, res, next) => {
     //GUARDAMOS EL PROYECTO
     await producto.save();
     //console.log(producto)
+
     res.json(producto);
   } catch (error) {
     console.log(error);
-    res.status(500).send("Hubo un Error");
+    res.status(500).send({ error: "Hubo un Error" });
   }
 };
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
+  console.log(req.params.busqueda);
+  let busquedaValue;
+  if (req.params.busqueda === "all") {
+    busquedaValue = {};
+  } else {
+    busquedaValue = { categoria: req.params.busqueda };
+  }
+
   try {
-    const productos = await Producto.find({}).sort({ creado: -1 });
-    res.json({ productos });
-    //console.log(productos)
+    const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 });
+    res.json({ prodAll });
+    console.log(prodAll);
   } catch (error) {
     console.log(error);
-    res.status(500).send("Hubo un Error");
+    res.status(500).send({ error: "Hubo un Error" });
   }
 };
 
 exports.obtenerProductosUser = async (req, res) => {
   try {
-    const productos = await Producto.find({ author: req.user.id }).sort({
+    const prodUser = await Producto.find({ author: req.user.id }).sort({
       creado: -1,
     });
-    //console.log(productos)
-    res.json({ productos });
+    console.log(prodUser);
+    res.json({ prodUser });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -89,24 +98,20 @@ exports.editarProductoUser = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  console.log(typeof(req.file))
-// if (Object.keys(req.file.filename).length === 0) {doc.productImage = doc.productImage;}
-//else {doc.productImage = req.file.filename}
   let dataBody = {
     categoria: req.body.categoria,
     subCategoria: req.body.subCategoria,
     title: req.body.title,
     price: req.body.price,
     description: req.body.description,
-    ...(typeof(req.file)!=="undefined" && {
+    contacto: req.body.contacto,
+    ...(typeof req.file !== "undefined" && {
       images: {
         url: req.file.path,
         filename: req.file.filename,
-      }
+      },
     }),
   };
-
-  
 
   try {
     //   //REVISAR EL ID
@@ -139,8 +144,6 @@ exports.editarProductoUser = async (req, res, next) => {
     res.status(500).send("Hubo un Error");
   }
 };
-
-
 
 //
 //ELIMINAR UN PRODUCTO

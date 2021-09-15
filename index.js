@@ -5,13 +5,13 @@ const cors = require ('cors')
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
-const path = require('path');
+// const path = require('path');
 //4 CONECTAMOS A LA BASE DE DATOS
 conectarDB();
 
 //app.use(cors({ credentials: true, origin: true }));
 app.options("*", cors());
-
+app.use(cors())
 // HABILITAR EXPRESS.JSON
 app.use(express.json({extended: true}));
 app.use(express.urlencoded({extended:true}))
@@ -20,7 +20,7 @@ app.use(express.urlencoded({extended:true}))
 //2 PUERTO DE LA APP
 const port = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
 
-app.use(cors())
+
 //IMPORTAR RUTAS
 app.use('/api/usuarios', require('./routes/usersRoutes'))//PARA CREAR USUARIOS
 app.use('/api/auth', require('./routes/auth'))//PARA AUTENTICAR USUARIOS

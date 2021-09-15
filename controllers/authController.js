@@ -16,13 +16,13 @@ exports.autenticarUser = async (req, res) => {
     //REVISAR QUE SEA USUARIO REGISTRADO
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "El usuario no existe" });
+      return res.status(401).send({error: 'El usuario no existe' });
     }
 
     //EN CASO DE QUE EXISTE REVISAMOS EL PASSWORD
     const correctPassword = await bcryptjs.compare(password, user.password);
     if (!correctPassword) {
-      return res.status(499).json({ msg: "Password Incorrecto" });
+      return res.status(401).json({error: 'Password Incorrecto' });
     }
 
     //SI TODO ES CORRECTO (EMAIL Y PASSWORD), GENERAMOS EL JWT
@@ -30,7 +30,6 @@ exports.autenticarUser = async (req, res) => {
     const payload = {
       user: {   
              id: user.id,
-        
       },
     };
    // console.log('hola' + ' ' + user.id)
@@ -42,22 +41,22 @@ exports.autenticarUser = async (req, res) => {
       },
       (error, token) => {
         if (error) throw error;
-        res.json({ token: token, msg: "Usuario Creado Correctamente" });
+        res.json({ token: token, errors: "Usuario Creado Correctamente" });
       }
     );
   } catch (error) {
-    console.log(error);
+    res.status(401).send({error:'Wrong user or Password'})
   }
 };
 
 //Obtiene que usuario esta autenticado
 exports.usuarioAutenticado = async (req, res) => {
   try {
-      const user = await User.findById(req.user.id).select('-password');
+      const user = await User.findById(req.user.id).select('password');
       res.json({user});
       //console.log(user)
   } catch (error) {
       console.log(error);
-      res.status(500).json({msg: 'Hubo un error'});
+      res.status(500).json({error: 'Hubo un error'});
   }
 }
