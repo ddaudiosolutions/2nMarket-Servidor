@@ -37,13 +37,15 @@ exports.obtenerProductos = async (req, res) => {
   console.log(req.params.busqueda);
   let busquedaValue;
   if (req.params.busqueda === "all") {
-    busquedaValue = {};
+    busquedaValue = {}
+    limit=4;
   } else {
     busquedaValue = { categoria: req.params.busqueda };
+    limit=null
   }
 
   try {
-    const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 });
+    const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
     res.json({ prodAll });
     console.log(prodAll);
   } catch (error) {
@@ -117,7 +119,20 @@ exports.editarProductoUser = async (req, res, next) => {
     //   //REVISAR EL ID
     const productoTest = await Producto.findById(req.params.id);
     // console.log('TEAT: '  + productoTest.images)
-
+    // Delete image from cloudinary
+    await cloudinary.uploader.destroy(
+      productoTest.images[0].filename)
+      // function (err, res) {
+      //   if (err) {
+      //     console.log(err);
+      //     return res.status(400).json({
+      //       ok: false,
+      //       menssage: "Error deleting file",
+      //       errors: err,
+      //     });
+      //   }
+      //   // console.log(res);
+      // })
     //   //SI EL PRODUCTO EXISTE O NO!!!
     if (!productoTest) {
       console.log("hay un error en edicion");
