@@ -38,7 +38,7 @@ exports.obtenerProductos = async (req, res) => {
   let busquedaValue;
   if (req.params.busqueda === "all") {
     busquedaValue = {}
-    limit=4;
+    limit=6;
   } else {
     busquedaValue = { categoria: req.params.busqueda };
     limit=null
