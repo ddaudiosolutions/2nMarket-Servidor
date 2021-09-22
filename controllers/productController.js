@@ -120,8 +120,11 @@ exports.editarProductoUser = async (req, res, next) => {
     const productoTest = await Producto.findById(req.params.id);
     // console.log('TEAT: '  + productoTest.images)
     // Delete image from cloudinary
-    await cloudinary.uploader.destroy(
-      productoTest.images[0].filename)
+    if(req.file){
+      await cloudinary.uploader.destroy(
+        productoTest.images[0].filename)
+    }
+    
       // function (err, res) {
       //   if (err) {
       //     console.log(err);
