@@ -34,20 +34,31 @@ exports.crearProducto = async (req, res, next) => {
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
-  console.log(req.params.busqueda);
+  //console.log(req.params.busqueda);
   let busquedaValue;
   if (req.params.busqueda === "all") {
-    busquedaValue = {}
-    limit=6;
+    busquedaValue = {};
+    //limit = 6;
   } else {
     busquedaValue = { categoria: req.params.busqueda };
-    limit=null
+   // limit = null;
   }
 
   try {
-    const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
-    res.json({ prodAll });
-    console.log(prodAll);
+    const PAGE_SIZE = 8;
+    const page = parseInt(req.query.page || "0");
+    const totalProductos = await Producto.countDocuments( busquedaValue );
+    const totalPages = Math.ceil(totalProductos / PAGE_SIZE);
+    
+    const prodAll = await Producto.find(busquedaValue)
+      .limit(PAGE_SIZE)
+      .skip(PAGE_SIZE * page)
+      .sort({ creado: -1 });
+
+    res.json({ prodAll, totalProductos, totalPages });
+    // const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
+    // res.json({ prodAll });
+     console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -56,11 +67,18 @@ exports.obtenerProductos = async (req, res) => {
 
 exports.obtenerProductosUser = async (req, res) => {
   try {
-    const prodUser = await Producto.find({ author: req.user.id }).sort({
+    const PAGE_SIZE = 8;
+    const page = parseInt(req.query.page || "0");
+    const totalProductosUs = await Producto.countDocuments({ author: req.user.id });
+    const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
+    const prodUser = await Producto.find({ author: req.user.id })      
+    .limit(PAGE_SIZE)  
+    .skip(PAGE_SIZE * page)      
+    .sort({
       creado: -1,
     });
-    console.log(prodUser);
-    res.json({ prodUser });
+    console.log(prodUser, totalProductosUs, totalPagesUs);
+    res.json({ prodUser, totalProductosUs, totalPagesUs });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -120,22 +138,21 @@ exports.editarProductoUser = async (req, res, next) => {
     const productoTest = await Producto.findById(req.params.id);
     // console.log('TEAT: '  + productoTest.images)
     // Delete image from cloudinary
-    if(req.file){
-      await cloudinary.uploader.destroy(
-        productoTest.images[0].filename)
+    if (req.file) {
+      await cloudinary.uploader.destroy(productoTest.images[0].filename);
     }
-    
-      // function (err, res) {
-      //   if (err) {
-      //     console.log(err);
-      //     return res.status(400).json({
-      //       ok: false,
-      //       menssage: "Error deleting file",
-      //       errors: err,
-      //     });
-      //   }
-      //   // console.log(res);
-      // })
+
+    // function (err, res) {
+    //   if (err) {
+    //     console.log(err);
+    //     return res.status(400).json({
+    //       ok: false,
+    //       menssage: "Error deleting file",
+    //       errors: err,
+    //     });
+    //   }
+    //   // console.log(res);
+    // })
     //   //SI EL PRODUCTO EXISTE O NO!!!
     if (!productoTest) {
       console.log("hay un error en edicion");
