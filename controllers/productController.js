@@ -68,13 +68,13 @@ exports.obtenerProductos = async (req, res) => {
 
 exports.obtenerProductosUser = async (req, res) => {
   try {
-    const PAGE_SIZE = 8;
-    const page = parseInt(req.query.page || "0");
+     const PAGE_SIZE = 8;
+    // const page = parseInt(req.query.page || "0");
     const totalProductosUs = await Producto.countDocuments({ author: req.user.id });
     const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
     const prodUser = await Producto.find({ author: req.user.id })      
-    .limit(PAGE_SIZE)  
-    .skip(PAGE_SIZE * page)      
+    // .limit(PAGE_SIZE)  
+    // .skip(PAGE_SIZE * page)      
     .sort({
       creado: -1,
     });
@@ -85,6 +85,26 @@ exports.obtenerProductosUser = async (req, res) => {
     res.status(500).send("Hubo un Error");
   }
 };
+///OBTENER PRODUCTOS USUARIO CON PAGINADOR (DESACTIVADO TEMPORALMENTE)
+// exports.obtenerProductosUser = async (req, res) => {
+//   try {
+//     const PAGE_SIZE = 8;
+//     const page = parseInt(req.query.page || "0");
+//     const totalProductosUs = await Producto.countDocuments({ author: req.user.id });
+//     const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
+//     const prodUser = await Producto.find({ author: req.user.id })      
+//     .limit(PAGE_SIZE)  
+//     .skip(PAGE_SIZE * page)      
+//     .sort({
+//       creado: -1,
+//     });
+//     console.log(prodUser, totalProductosUs, totalPagesUs);
+//     res.json({ prodUser, totalProductosUs, totalPagesUs });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send("Hubo un Error");
+//   }
+// };
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {

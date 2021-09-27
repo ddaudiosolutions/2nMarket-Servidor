@@ -49,10 +49,7 @@ exports.crearUsuario = async (req, res) => {
         // console.log(token)
       }
     );
-
-    
-  } catch (error) {    
-    res.status(400).json({msg: "Error en el sistema"});
+  } catch (error) {
+    res.status(400).json({ msg: "Error en el sistema" });
   }
-  
 };
