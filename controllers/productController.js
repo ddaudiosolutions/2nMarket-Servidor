@@ -34,13 +34,14 @@ exports.crearProducto = async (req, res, next) => {
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
-  //console.log(req.params.busqueda);
+  // let busqueda = req.query.busqueda
+  // console.log(busqueda);
   let busquedaValue;
-  if (req.params.busqueda === "all") {
+  if (req.query.busqueda === "all") {
     busquedaValue = {};
     //limit = 6;
   } else {
-    busquedaValue = { categoria: req.params.busqueda };
+    busquedaValue = { categoria: req.query.busqueda };
    // limit = null;
   }
 

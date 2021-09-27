@@ -42,16 +42,16 @@ auth,
 productController.obtenerProductosUser);
 
 //OBTENER TODOS LOS PRODUCTOS
-router.get("/:busqueda", 
+router.get("/", 
 auth, 
 productController.obtenerProductos);
 
 
 
-//OBTENER UN PRODUCTO
-router.get('/:id',
-auth,
-productController.obtenerProductoId);
+//OBTENER UN PRODUCTO (NOS AHORRAMOS ESTO AL TENER LA INFO EN MEMORIA EN EL STATE EN REACT)
+// router.get('/:id',
+// auth,
+// productController.obtenerProductoId);
 
 //MOSTRAR PRODUCTO EDITAR
 router.get("/user/editar/:id", 
