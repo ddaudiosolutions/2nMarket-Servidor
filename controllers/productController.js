@@ -35,9 +35,9 @@ exports.crearProducto = async (req, res, next) => {
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
   let busqueda = req.query.busqueda
-   console.log(busqueda);
+  // console.log(busqueda);
   let busquedaValue = req.query.busqueda;
-  console.log(busquedaValue);
+  //console.log(busquedaValue);
   if (req.query.busqueda === "ultimos_productos") {
     busquedaValue = {};
     //limit = 6;
@@ -55,12 +55,14 @@ exports.obtenerProductos = async (req, res) => {
     const prodAll = await Producto.find(busquedaValue)
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
-      .sort({ creado: -1 });
-
+      .sort({ creado: -1 })
+      .populate({path: 'author', select: 'nombre'})
+      
+      //console.log(prodAll.author.nombre);
     res.json({ prodAll, totalProductos, totalPages });
     // const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
     // res.json({ prodAll });
-     console.log(totalProductos, totalPages, prodAll);
+     //console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -79,7 +81,7 @@ exports.obtenerProductosUser = async (req, res) => {
     .sort({
       creado: -1,
     });
-    console.log(prodUser, totalProductosUs, totalPagesUs);
+    //console.log(prodUser, totalProductosUs, totalPagesUs);
     res.json({ prodUser, totalProductosUs, totalPagesUs });
   } catch (error) {
     console.log(error);
@@ -111,7 +113,7 @@ exports.obtenerProductosUser = async (req, res) => {
 exports.obtenerProductoId = async (req, res) => {
   try {
     const productoId = await Producto.findById(req.params.id);
-    console.log(productoId);
+   
     res.json({ productoId });
   } catch (error) {
     console.log(error);
@@ -123,7 +125,7 @@ exports.obtenerProductoId = async (req, res) => {
 exports.obtenerProductoEditar = async (req, res) => {
   try {
     const producto = await Producto.findById(req.params.id);
-    //res.json(req.body)
+   
     console.log("el producto :" + producto);
     res.json({ producto });
   } catch (error) {

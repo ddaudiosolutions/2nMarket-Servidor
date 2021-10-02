@@ -10,7 +10,7 @@ exports.autenticarUser = async (req, res) => {
   }
 
   // EXTRAER MAIL Y PASSWORD DEL USUARIO
-  const { email, password } = req.body;
+  const { email, password, nombre } = req.body;
 
   try {
     //REVISAR QUE SEA USUARIO REGISTRADO
@@ -29,19 +29,21 @@ exports.autenticarUser = async (req, res) => {
     //CREAR Y FIRMAR EL JWT
     const payload = {
       user: {   
-             id: user.id,
+             id: user.id,  
+             nombre: user.nombre           
       },
     };
-   // console.log('hola' + ' ' + user.id)
-    jwt.sign(
-      payload,
-      process.env.SECRETA,
+    let usernombre = user.nombre
+   console.log('hola' + ' ' + user.id + user.nombre)
+
+    jwt.sign( payload, process.env.SECRETA,
       {
-        expiresIn: 36000, //1hora convertido a segundos
+        expiresIn: 18000, //Media hora convertido a segundos
       },
-      (error, token) => {
+
+      (error, token, ) => {
         if (error) throw error;
-        res.json({ token: token, errors: "Usuario Creado Correctamente" });
+        res.json({ token: token, errors: "Usuario Creado Correctamente", nombre: usernombre });
       }
     );
   } catch (error) {
@@ -52,9 +54,10 @@ exports.autenticarUser = async (req, res) => {
 //Obtiene que usuario esta autenticado
 exports.usuarioAutenticado = async (req, res) => {
   try {
-      const user = await User.findById(req.user.id).select('password');
+      const user = await User.findById(req.user.id).select('password').select('nombre');
+      console.log(user)
       res.json({user});
-      //console.log(user)
+      
   } catch (error) {
       console.log(error);
       res.status(500).json({error: 'Hubo un error'});
