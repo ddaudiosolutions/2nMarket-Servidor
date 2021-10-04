@@ -41,12 +41,12 @@ exports.crearUsuario = async (req, res) => {
       payload,
       process.env.SECRETA,
       {
-        expiresIn: 36000, //1hora convertido a segundos
+        expiresIn: 120, //1hora convertido a segundos
       },
       (error, token) => {
         if (error) throw error;
         res.json({ token: token, msg: "Usuario Creado Correctamente" });
-        // console.log(token)
+         console.log(token)
       }
     );
   } catch (error) {

@@ -64,7 +64,7 @@ exports.obtenerProductos = async (req, res) => {
     // res.json({ prodAll });
      //console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
   }
 };

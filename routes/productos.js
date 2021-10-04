@@ -19,7 +19,6 @@ const { parser} = require ('../cloudinary')
 router.post(
   "/",
   auth,   
-  
   // [
   //   check("title", "El nombre es obligatorio").not().isEmpty(),
   //   check("description", "Introduce una pequeña descripción").not().isEmpty(),
