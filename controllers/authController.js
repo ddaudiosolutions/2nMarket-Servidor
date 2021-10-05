@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator"); //usamos esto para va
 const jwt = require("jsonwebtoken");
 
 exports.autenticarUser = async (req, res) => {
+ 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -13,6 +14,7 @@ exports.autenticarUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    
     //REVISAR QUE SEA USUARIO REGISTRADO
     let user = await User.findOne({ email });
     if (!user) {
@@ -38,7 +40,7 @@ exports.autenticarUser = async (req, res) => {
 
     jwt.sign( payload, process.env.SECRETA,
       {
-        expiresIn: 18000, //Media hora convertido a segundos
+        expiresIn: 43200, //Media hora convertido a segundos
       },
 
       (error, token, ) => {
