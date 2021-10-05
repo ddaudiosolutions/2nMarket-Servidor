@@ -45,7 +45,10 @@ router.get("/",
 auth, 
 productController.obtenerProductos);
 
-
+//OBTENER TODOS LOS PRODUCTOS de un AUTOR
+router.get("/auth", 
+auth, 
+productController.obtenerProductosAuthor);
 
 //OBTENER UN PRODUCTO (NOS AHORRAMOS ESTO AL TENER LA INFO EN MEMORIA EN EL STATE EN REACT)
 // router.get('/:id',

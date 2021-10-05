@@ -36,7 +36,7 @@ exports.autenticarUser = async (req, res) => {
       },
     };
     let usernombre = user.nombre
-   console.log('hola' + ' ' + user.id + user.nombre)
+   //console.log('hola' + ' ' + user.id + user.nombre)
 
     jwt.sign( payload, process.env.SECRETA,
       {
@@ -57,7 +57,7 @@ exports.autenticarUser = async (req, res) => {
 exports.usuarioAutenticado = async (req, res) => {
   try {
       const user = await User.findById(req.user.id).select('password').select('nombre');
-      console.log(user)
+     // console.log(user)
       res.json({user});
       
   } catch (error) {

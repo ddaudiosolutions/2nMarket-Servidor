@@ -109,6 +109,30 @@ exports.obtenerProductosUser = async (req, res) => {
 //   }
 // };
 
+exports.obtenerProductosAuthor = async (req, res) => {
+  //const authorid = req.query.authorid
+  
+  try {
+     //const PAGE_SIZE = 8;
+    // const page = parseInt(req.query.page || "0");
+    const totalProductosAuth = await Producto.countDocuments({ author: req.query.authorid});
+    //const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
+    const prodAuth = await Producto.find({ author: req.query.authorid })      
+    // .limit(PAGE_SIZE)  
+    // .skip(PAGE_SIZE * page)      
+    .sort({
+      creado: -1,
+    })
+    .populate({path: 'author', select: 'nombre'});
+    
+    console.log(prodAuth, totalProductosAuth);
+    res.json({ prodAuth, totalProductosAuth });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Hubo un Error");
+  }
+};
+
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
   try {

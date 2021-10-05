@@ -46,7 +46,7 @@ exports.crearUsuario = async (req, res) => {
       (error, token) => {
         if (error) throw error;
         res.json({ token: token, msg: "Usuario Creado Correctamente" });
-         console.log(token)
+        // console.log(token)
       }
     );
   } catch (error) {
