@@ -41,7 +41,7 @@ exports.crearUsuario = async (req, res) => {
       payload,
       process.env.SECRETA,
       {
-        expiresIn: 43200, //1hora convertido a segundos
+        expiresIn: 7200, //1hora convertido a segundos
       },
       (error, token) => {
         if (error) throw error;
