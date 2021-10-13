@@ -110,14 +110,15 @@ exports.obtenerProductosUser = async (req, res) => {
 // };
 
 exports.obtenerProductosAuthor = async (req, res) => {
-  const authorid = req.query.authorid
-  console.log(authorid)
+ // const authorid = req.query.authorid
+  //const authorId = req.params
+  //console.log(authorId)
   try {
      //const PAGE_SIZE = 8;
     // const page = parseInt(req.query.page || "0");
-    const totalProductosAuth = await Producto.countDocuments({ author: req.query.authorid});
+    const totalProductosAuth = await Producto.countDocuments({ author: req.params.id});
     //const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
-    const prodAuth = await Producto.find({ author: req.query.authorid })      
+    const prodAuth = await Producto.find({ author: req.params.id })      
     // .limit(PAGE_SIZE)  
     // .skip(PAGE_SIZE * page)      
     .sort({
@@ -125,8 +126,8 @@ exports.obtenerProductosAuthor = async (req, res) => {
     })
     .populate({path: 'author', select: 'nombre'});
     
-    //console.log(prodAuth, totalProductosAuth);
-    res.json({ prodAuth, totalProductosAuth });
+    console.log(prodAuth, totalProductosAuth);
+    res.send({ prodAuth, totalProductosAuth });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
