@@ -35,7 +35,11 @@ const windfoilproductSchema = new Schema({
     creado: {
         type: Date,
         default: Date
-    }
+    },
+  //   imagesAv: {
+  //     type: Schema.Types.ObjectId,
+  //     ref: 'Avatar'
+  // },
 
 
     

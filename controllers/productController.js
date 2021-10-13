@@ -56,7 +56,7 @@ exports.obtenerProductos = async (req, res) => {
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
       .sort({ creado: -1 })
-      .populate({path: 'author', select: 'nombre'})
+      .populate({path: 'author', select: 'nombre direccion telefono email'})
       
       //console.log(prodAll.author.nombre);
     res.json({ prodAll, totalProductos, totalPages });
@@ -110,8 +110,8 @@ exports.obtenerProductosUser = async (req, res) => {
 // };
 
 exports.obtenerProductosAuthor = async (req, res) => {
-  //const authorid = req.query.authorid
-  
+  const authorid = req.query.authorid
+  console.log(authorid)
   try {
      //const PAGE_SIZE = 8;
     // const page = parseInt(req.query.page || "0");
@@ -125,7 +125,7 @@ exports.obtenerProductosAuthor = async (req, res) => {
     })
     .populate({path: 'author', select: 'nombre'});
     
-    console.log(prodAuth, totalProductosAuth);
+    //console.log(prodAuth, totalProductosAuth);
     res.json({ prodAuth, totalProductosAuth });
   } catch (error) {
     console.log(error);
@@ -136,8 +136,9 @@ exports.obtenerProductosAuthor = async (req, res) => {
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
   try {
-    const productoId = await Producto.findById(req.params.id);
-   
+    const productoId = await Producto.findById(req.params.id)
+      .populate({path: 'author', select: 'nombre direccion telefono email'});
+   console.log(productoId)
     res.json({ productoId });
   } catch (error) {
     console.log(error);

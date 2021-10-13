@@ -30,8 +30,7 @@ router.post(
   //   check("images", "Debes subir una images").not().isBase64()
     
   // ],
-  parser.single('images'),  
-  
+  parser.single('images'),    
   productController.crearProducto
 );
 
@@ -42,18 +41,18 @@ productController.obtenerProductosUser);
 
 //OBTENER TODOS LOS PRODUCTOS
 router.get("/", 
-auth, 
+//auth, 
 productController.obtenerProductos);
 
 //OBTENER TODOS LOS PRODUCTOS de un AUTOR
 router.get("/auth", 
-auth, 
+//auth, 
 productController.obtenerProductosAuthor);
 
 //OBTENER UN PRODUCTO (NOS AHORRAMOS ESTO AL TENER LA INFO EN MEMORIA EN EL STATE EN REACT)
-// router.get('/:id',
-// auth,
-// productController.obtenerProductoId);
+router.get('/:id',
+//auth,
+productController.obtenerProductoId);
 
 //MOSTRAR PRODUCTO EDITAR
 router.get("/user/editar/:id", 

@@ -12,7 +12,6 @@ exports.autenticarUser = async (req, res) => {
 
   // EXTRAER MAIL Y PASSWORD DEL USUARIO
   const { email, password } = req.body;
-
   try {
     
     //REVISAR QUE SEA USUARIO REGISTRADO
@@ -36,6 +35,7 @@ exports.autenticarUser = async (req, res) => {
       },
     };
     let usernombre = user.nombre
+    let userId = user.id
    //console.log('hola' + ' ' + user.id + user.nombre)
 
     jwt.sign( payload, process.env.SECRETA,
@@ -45,7 +45,7 @@ exports.autenticarUser = async (req, res) => {
 
       (error, token, ) => {
         if (error) throw error;
-        res.json({ token: token, errors: "Usuario Creado Correctamente", nombre: usernombre });
+        res.json({ token: token, errors: "Usuario Creado Correctamente", nombre: usernombre, id: userId });
       }
     );
   } catch (error) {

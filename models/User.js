@@ -24,10 +24,25 @@ const UserSchema = new Schema({
     unique: true,
     trim: true,
   },
+  telefono: {
+    type: Number,
+    //required: true,
+    trim: true,
+    unique: true,
+  },
+  direccion: {
+    type: String,
+   // required: true,  
+  },
   registro: {
     type: Date,
     default: Date.now(),
   },
+  // imagesAvatar: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: 'Avatar'
+  // }
+  
 });
 
 //UserSchema.plugin(passportLocalMongoose);
