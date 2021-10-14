@@ -10,7 +10,7 @@ const windfoilproductSchema = new Schema({
        url: String,
        filename: String
        
-     }],
+     }],     
     description: {
         type: String,  
       },

@@ -30,7 +30,7 @@ router.post(
   //   check("images", "Debes subir una images").not().isBase64()
     
   // ],
-  parser.single('images'),    
+  parser.array('images', 4),    
   productController.crearProducto
 );
 
@@ -62,7 +62,7 @@ productController.obtenerProductoEditar);
 //ACTUALIZAR PRODUCTOS DE USUARIO
 router.put("/user/editar/:id", 
 auth, 
-parser.single('images'),
+parser.array('images', 4),
 productController.editarProductoUser,
 
 //productController.obtenerProductoEditar,
