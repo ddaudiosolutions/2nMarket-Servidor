@@ -40,7 +40,7 @@ exports.autenticarUser = async (req, res) => {
 
     jwt.sign( payload, process.env.SECRETA,
       {
-        expiresIn: 7200, //Media hora convertido a segundos
+        expiresIn: 43200, //12 horas convertido a segundos
       },
 
       (error, token, ) => {
