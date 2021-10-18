@@ -23,7 +23,7 @@ exports.autenticarUser = async (req, res) => {
     //EN CASO DE QUE EXISTE REVISAMOS EL PASSWORD
     const correctPassword = await bcryptjs.compare(password, user.password);
     if (!correctPassword) {
-      return res.status(401).json({error: 'Password Incorrecto' });
+      return res.status(401).send({error: 'Password Incorrecto' });
     }
 
     //SI TODO ES CORRECTO (EMAIL Y PASSWORD), GENERAMOS EL JWT
@@ -38,16 +38,17 @@ exports.autenticarUser = async (req, res) => {
     let userId = user.id
    //console.log('hola' + ' ' + user.id + user.nombre)
 
-    jwt.sign( payload, process.env.SECRETA,
+    let token= jwt.sign( payload, process.env.SECRETA,
       {
         expiresIn: 43200, //12 horas convertido a segundos
-      },
+      });
 
-      (error, token, ) => {
-        if (error) throw error;
-        res.json({ token: token, errors: "Usuario Creado Correctamente", nombre: usernombre, id: userId });
-      }
-    );
+      // (error, token, ) => {
+      //   if (error) throw error;
+        res.status(200).send({accessToken: token, errors: "Usuario Loggeado Correctamente", nombre: usernombre, id: userId });
+
+      //}
+    //);
   } catch (error) {
     res.status(401).send({error:'Wrong user or Password'})
   }

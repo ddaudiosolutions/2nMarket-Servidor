@@ -27,27 +27,29 @@ exports.crearUsuario = async (req, res, next) => {
 
     //CREANDO EL USUARIO
     await user.save();
+    
+    res.status(200).send({msg:'usuario creado correctamente'});
 
     //CREAR Y FIRMAR EL JWT
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
+    // const payload = {
+    //   user: {
+    //     id: user.id,
+    //   },
+    // };
 
-    //FIRMAR EL JWT
-    jwt.sign(
-      payload,
-      process.env.SECRETA,
-      {
-        expiresIn: 7200, //1hora convertido a segundos
-      },
-      (error, token) => {
-        if (error) throw error;
-        res.json({ token: token, msg: "Usuario Creado Correctamente" });
-        // console.log(token)
-      }
-    );
+    // //FIRMAR EL JWT
+    // jwt.sign(
+    //   payload,
+    //   process.env.SECRETA,
+    //   {
+    //     expiresIn: 7200, //1hora convertido a segundos
+    //   },
+      // (error) => {
+      //   if (error) throw error;
+      //   res.json({msg: "Usuario Creado Correctamente" });
+      //   // console.log(token)
+      // }
+    
   } catch (error) {
     res.status(400).json({ msg: "Error en el sistema" });
   }
