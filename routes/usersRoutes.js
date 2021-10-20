@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const users = require("../controllers/userController");
 const { check } = require("express-validator");
-const { parser2, parser} = require ('../cloudinary')
+const {   storage2} = require ('../cloudinary')
 const dotenv = require ('dotenv')
  dotenv.config()
 const auth = require("../middleware/auth");
-
+const multer = require('multer')
 
 //CREAR UN USUARIO
 //api/usuarios
@@ -35,7 +35,7 @@ users.obtenerUsuario,
 //ACTUALIZAR DATOS DE USUARIO
 router.put("/editar/:id", 
 auth, 
-//parser.single("imagesAvatar"),
+multer({storage: storage2}).single("imagesAvatar"),
 users.editarUsuario
 );
 

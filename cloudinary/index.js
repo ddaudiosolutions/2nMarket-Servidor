@@ -3,6 +3,7 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer')
 
+
  cloudinary.config ({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_KEY,
@@ -21,8 +22,6 @@ const multer = require('multer')
     
 });
 
-const parser = multer({storage})
-
 
 //PARA ALMACENAR LAS IMAGENES DE LOS AVATARES DE USUARIOS
 const storage2 = new CloudinaryStorage ({
@@ -35,11 +34,13 @@ const storage2 = new CloudinaryStorage ({
     
 });
 
-const parser2 = multer({storage2})
+const parser = multer({storage: storage})
+
+//const parser2 = multer({storage2})
 
 module.exports = {
     cloudinary,
     storage,
-    parser,
-    parser2
+    storage2,
+    parser
 }

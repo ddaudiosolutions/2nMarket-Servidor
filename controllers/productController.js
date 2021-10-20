@@ -130,7 +130,7 @@ exports.obtenerProductosAuthor = async (req, res) => {
     .sort({
       creado: -1,
     })
-    .populate({path: 'author', select: 'nombre'});
+    .populate({path: 'author', select: 'nombre  email imagesAvatar '});
     
     console.log(prodAuth, totalProductosAuth);
     res.send({ prodAuth, totalProductosAuth });
@@ -144,7 +144,7 @@ exports.obtenerProductosAuthor = async (req, res) => {
 exports.obtenerProductoId = async (req, res) => {
   try {
     const productoId = await Producto.findById(req.params.id)
-      .populate({path: 'author', select: 'nombre direccion telefono email'});
+      .populate({path: 'author', select: 'nombre direccion telefono email imagesAvatar'});
       
   
     res.json({ productoId });

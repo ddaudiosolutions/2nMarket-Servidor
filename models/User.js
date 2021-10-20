@@ -38,10 +38,11 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  // imagesAvatar: {
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'Avatar'
-  // }
+  imagesAvatar: [{
+    url: String,
+    filename: String
+    
+  }]
   
 });
 
