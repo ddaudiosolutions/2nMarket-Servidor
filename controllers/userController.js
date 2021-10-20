@@ -35,25 +35,7 @@ exports.crearUsuario = async (req, res, next) => {
 
     res.status(200).send({ msg: "usuario creado correctamente" });
 
-    //CREAR Y FIRMAR EL JWT
-    // const payload = {
-    //   user: {
-    //     id: user.id,
-    //   },
-    // };
-
-    // //FIRMAR EL JWT
-    // jwt.sign(
-    //   payload,
-    //   process.env.SECRETA,
-    //   {
-    //     expiresIn: 7200, //1hora convertido a segundos
-    //   },
-    // (error) => {
-    //   if (error) throw error;
-    //   res.json({msg: "Usuario Creado Correctamente" });
-    //   // console.log(token)
-    // }
+    
   } catch (error) {
     res.status(400).json({ msg: "Error en el sistema" });
   }
@@ -214,3 +196,73 @@ exports.obtenerUsuarios = async (req, res) => {
 //     res.status(500).send("Hubo un Error");
 //   }
 // }
+
+exports.eliminarUsuario = async (req, res) => {
+  //REVISAR SI HAY ERRORES
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  console.log(req.params.id)
+  try {
+    //REVISAR EL ID
+    let usuario = await User.findById(req.params.id);
+    console.log(usuario)
+
+    if (usuario.imagesAvatar[0].filename) {
+      await cloudinary.uploader.destroy(
+        usuario.imagesAvatar[0].filename,
+        function (err, res) {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({
+              ok: false,
+              menssage: "Error deleting file",
+              errors: err,
+            });
+          }
+          console.log(res);
+        }
+      );
+    } else {
+      console.log('no hay foto')
+    }
+    //SI EL USUARIO EXISTE O NO!!!
+    if (!usuario) {
+      return res.status(404).send({ msg: "Usuario no encontrado" });
+    }
+
+    //Verificar el USUARIO
+    // if (usuario._id !== req.user.id) {
+    //   return res.status(401).json({ msg: "No Autorizado para Eliminar" });
+    // }
+
+    //ELIMINAR EL USUARIO
+    usuario = await User.findByIdAndDelete(req.params.id);
+    
+    //ITERAMOS SOBRE LAS IMAGENES PARA TOMAR EL NOMBRE DE CADA IMAGEN Y BORRARLA EN CLOUDINARY
+    // for(let imagesAvatar of usuario.imagesAvatar){   
+    //    cloudinary.uploader.destroy(
+    //     imagesAvatar.filename,
+    //     function (err, res) {
+    //       if (err) {
+    //         console.log(err);
+    //         return res.status(400).json({
+    //           ok: false,
+    //           menssage: "Error deleting file",
+    //           errors: err,
+    //         });
+    //       }
+    //        console.log(res);
+    //     }
+    //   );}   
+
+      
+    
+
+    res.json({ msg: "USUARIO ELIMINADO" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Hubo un Error");
+  }
+};

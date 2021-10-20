@@ -48,6 +48,10 @@ users.editarUsuario
 // router.get('/avatar/:id',
 // //auth,
 // users.obtenerAvatar)
+router.delete('/:id',
+auth, 
+users.eliminarUsuario,
+);
 
 //OBTENER TODOS LOS USUARIOS
 router.get('/',
