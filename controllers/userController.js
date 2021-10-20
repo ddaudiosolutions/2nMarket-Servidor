@@ -58,7 +58,7 @@ exports.crearUsuario = async (req, res, next) => {
 exports.obtenerUsuario = async (req, res) => {
   try {
     const userGet = await User.findById(req.params.id);
-    //console.log(userGet)
+    console.log(userGet)
     res.send(userGet);
   } catch (error) {
     console.log(error);
@@ -105,22 +105,22 @@ exports.editarUsuario = async (req, res) => {
     }
 
     //BORRAR EL AVATAR DE CLOUDINARY EN CASO DE SUBIR UNO NUEVO
-    if (req.file) {
-      await cloudinary.uploader.destroy(
-        userTest.imagesAvatar[0].filename,
-        function (err, res) {
-          if (err) {
-            console.log(err);
-            return res.status(400).json({
-              ok: false,
-              menssage: "Error deleting file",
-              errors: err,
-            });
-          }
-          console.log(res);
-        }
-      );
-    }
+    // if (req.file) {
+    //   await cloudinary.uploader.destroy(
+    //     userTest.imagesAvatar[0].filename,
+    //     function (err, res) {
+    //       if (err) {
+    //         console.log(err);
+    //         return res.status(400).json({
+    //           ok: false,
+    //           menssage: "Error deleting file",
+    //           errors: err,
+    //         });
+    //       }
+    //       console.log(res);
+    //     }
+    //   );
+    // }
 
     //ACTUALIZAR USUARIO
     const user = await User.findByIdAndUpdate(
