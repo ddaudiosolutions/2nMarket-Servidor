@@ -26,6 +26,10 @@ exports.crearUsuario = async (req, res, next) => {
     const salt = await bcryptjs.genSalt(10);
     user.password = await bcryptjs.hash(password, salt);
 
+    //CREAMOS UN OBJETO VACIO EN EL ARRAY DE LAS IMAGESAVATAR
+    user.imagesAvatar = {
+      
+    }
     //CREANDO EL USUARIO
     await user.save();
 
@@ -58,7 +62,7 @@ exports.crearUsuario = async (req, res, next) => {
 exports.obtenerUsuario = async (req, res) => {
   try {
     const userGet = await User.findById(req.params.id);
-    console.log(userGet)
+    //console.log(userGet.imagesAvatar[0]._id)
     res.send(userGet);
   } catch (error) {
     console.log(error);
@@ -103,24 +107,24 @@ exports.editarUsuario = async (req, res) => {
     if (userTest.id !== req.user.id) {
       return res.status(401).json({ msg: "No Estás Autorizado para Editar" });
     }
-
+   // console.log(userTest.imagesAvatar[0]._id)
     //BORRAR EL AVATAR DE CLOUDINARY EN CASO DE SUBIR UNO NUEVO
-    // if (req.file) {
-    //   await cloudinary.uploader.destroy(
-    //     userTest.imagesAvatar[0].filename,
-    //     function (err, res) {
-    //       if (err) {
-    //         console.log(err);
-    //         return res.status(400).json({
-    //           ok: false,
-    //           menssage: "Error deleting file",
-    //           errors: err,
-    //         });
-    //       }
-    //       console.log(res);
-    //     }
-    //   );
-    // }
+    if (req.file && (userTest.imagesAvatar[0].filename)) {
+      await cloudinary.uploader.destroy(
+        userTest.imagesAvatar[0].filename,
+        function (err, res) {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({
+              ok: false,
+              menssage: "Error deleting file",
+              errors: err,
+            });
+          }
+          console.log(res);
+        }
+      );
+    }
 
     //ACTUALIZAR USUARIO
     const user = await User.findByIdAndUpdate(

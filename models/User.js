@@ -40,8 +40,7 @@ const UserSchema = new Schema({
   },
   imagesAvatar: [{
     url: String,
-    filename: String
-    
+    filename: String    
   }]
   
 });
