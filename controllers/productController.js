@@ -198,11 +198,16 @@ exports.editarProductoUser = async (req, res, next) => {
       { $set: req.body },
       { new: true }
     );
+
     const images = req.files.map(f => ({url: f.path, filename: f.filename}));
     producto.images.push(...images)
+      console.log(producto.images)
+    // producto.images = req.files.map(f => ({url: f.path, filename: f.filename}));
+    // //producto.images.push(...images)
     // await producto.save()
-    res.json({ producto });
+   
      await producto.save()
+     res.json({ producto });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
