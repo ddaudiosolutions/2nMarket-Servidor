@@ -43,22 +43,32 @@ exports.crearProducto = async (req, res, next) => {
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
   let busqueda = req.query.busqueda;
-  // console.log(busqueda);
-  let busquedaValue = req.query.busqueda;
+   console.log('la busqueda es:  ' + busqueda);
+  let busquedaValue = {};
   //console.log(busquedaValue);
-  if (req.query.busqueda === "ultimos_productos") {
+  if (busqueda === "ultimos_productos") {
     busquedaValue = {};
-    //limit = 6;
+    limit = 4;
+   // PAGE_SIZE = limit
   } else {
     busquedaValue = { categoria: busqueda };
-    // limit = null;
+    limit = 8
+    //PAGE_SIZE = limit
   }
 
   try {
-    const PAGE_SIZE = 8;
+
+    const PAGE_SIZE = limit;
     const page = parseInt(req.query.page || "0");
     const totalProductos = await Producto.countDocuments(busquedaValue);
     const totalPages = Math.ceil(totalProductos / PAGE_SIZE);
+    
+    // if(busquedaValue === {}){
+    //  const  PAGE_SIZE = 6;
+    //    page = parseInt( "0");
+    //    totalProductos = await Producto.countDocuments(busquedaValue);
+    //    totalPages = 0;
+    // }
 
     const prodAll = await Producto.find(busquedaValue)
       .limit(PAGE_SIZE)
@@ -66,11 +76,11 @@ exports.obtenerProductos = async (req, res) => {
       .sort({ creado: -1 })
       .populate({ path: "author", select: "nombre direccion telefono email" });
 
-    //console.log(prodAll.author.nombre);
+    console.log(prodAll);
     res.json({ prodAll, totalProductos, totalPages });
     // const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
     // res.json({ prodAll });
-    //console.log(totalProductos, totalPages, prodAll);
+    console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
     //console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -242,6 +252,7 @@ exports.editarProductoUser = async (req, res, next) => {
       {new: true}
     );
 
+    
     
     const images = req.files.map((f) => ({
       url: f.path,
