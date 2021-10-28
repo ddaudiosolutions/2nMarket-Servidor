@@ -1,7 +1,7 @@
 const Producto = require("../models/ProductModel");
 const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
-const mongoose = require("mongoose");
+//const mongoose = require("mongoose");
 
 exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -13,7 +13,6 @@ exports.crearProducto = async (req, res, next) => {
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-
     //PARA SUBIR UNA SOLA IMAGEN
     // producto.images = {
     //   url: req.file.path,
@@ -43,16 +42,16 @@ exports.crearProducto = async (req, res, next) => {
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
   let busqueda = req.query.busqueda;
-   console.log('la busqueda es:  ' + busqueda);
+  // console.log('la busqueda es:  ' + busqueda);
   let busquedaValue = {};
   //console.log(busquedaValue);
   if (busqueda === "ultimos_productos") {
     busquedaValue = {};
-    limit = 4;
+    limit = 5;
    // PAGE_SIZE = limit
   } else {
     busquedaValue = { categoria: busqueda };
-    limit = 8
+    limit = 10
     //PAGE_SIZE = limit
   }
 
@@ -76,11 +75,11 @@ exports.obtenerProductos = async (req, res) => {
       .sort({ creado: -1 })
       .populate({ path: "author", select: "nombre direccion telefono email" });
 
-    console.log(prodAll);
+   // console.log(prodAll);
     res.json({ prodAll, totalProductos, totalPages });
     // const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
     // res.json({ prodAll });
-    console.log(totalProductos, totalPages, prodAll);
+    //console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
     //console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -212,6 +211,7 @@ exports.editarProductoUser = async (req, res, next) => {
       return res.status(401).json({ msg: "No Autorizado para Editar" });
     }
 
+    //BORRAR IMAGENES DE CLOUDINARY
     if (imagesDelete !== undefined) {
       if (typeof imagesDelete === "string") {
         cloudinary.uploader.destroy(imagesDelete, function (err, res) {
@@ -250,9 +250,7 @@ exports.editarProductoUser = async (req, res, next) => {
       '$pull': {"images":  {"filename": imagesDelete }}, 
       '$set': {title, categoria, subCategoria, price, description, contacto}},     
       {new: true}
-    );
-
-    
+    );    
     
     const images = req.files.map((f) => ({
       url: f.path,

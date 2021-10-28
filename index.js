@@ -25,6 +25,7 @@ const port = process.env.PORT || 4000; //debe ser un servidor diferente al clien
 app.use('/api/usuarios', require('./routes/usersRoutes'))//PARA CREAR USUARIOS
 app.use('/api/auth', require('./routes/auth'))//PARA AUTENTICAR USUARIOS
 app.use('/api/productos', require('./routes/productos'))// PARA MANEJAR LOS PRODUCTOS
+app.use('/api/buscoposts', require('./routes/buscoPost'))//PARA MANEJAR LOS POST DE BUSCO;
 // //DEFINIR LA PAGINA PRINCIPAL
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
