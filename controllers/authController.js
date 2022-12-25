@@ -12,6 +12,7 @@ exports.autenticarUser = async (req, res) => {
 
   // EXTRAER MAIL Y PASSWORD DEL USUARIO
   const { email, password } = req.body;
+  console.log('Usuario Conectado', req.body)
   try {
     
     //REVISAR QUE SEA USUARIO REGISTRADO
@@ -45,7 +46,7 @@ exports.autenticarUser = async (req, res) => {
 
       // (error, token, ) => {
       //   if (error) throw error;
-        res.status(200).send({accessToken: token, errors: "Usuario Loggeado Correctamente", nombre: usernombre, id: userId });
+        res.status(200).send({accessToken: token, message: "Usuario Loggeado Correctamente", nombre: usernombre, id: userId });
 
       //}
     //);

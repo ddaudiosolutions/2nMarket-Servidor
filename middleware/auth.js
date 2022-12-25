@@ -4,7 +4,7 @@ module.exports = function (req, res, next) {
     //LEER EL TOKEN DEL HEADER
 
     const token = req.header('x-auth-token');
-    //console.log(token)
+    console.log(token)
 
     //REVISAMOS SI NO HAY TOKEN
     if(!token) {

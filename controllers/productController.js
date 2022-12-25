@@ -163,7 +163,7 @@ exports.obtenerProductoId = async (req, res) => {
       path: "author",
       select: "nombre direccion telefono email imagesAvatar",
     });
-
+    console.log(productoId);
     res.json({ productoId });
   } catch (error) {
     console.log(error);
