@@ -6,8 +6,7 @@ const cors = require ('cors')
 const app = express();
 
 // const path = require('path');
-//4 CONECTAMOS A LA BASE DE DATOS
-conectarDB();
+
 
 //app.use(cors({ credentials: true, origin: true }));
 app.options("*", cors());
@@ -29,7 +28,10 @@ app.use('/api/buscoposts', require('./routes/buscoPost'))//PARA MANEJAR LOS POST
 // //DEFINIR LA PAGINA PRINCIPAL
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-//3 ARRAMCAMOS SERVIDOR
-app.listen(port,  () => {
-    console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
+//3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
+//4 CONECTAMOS A LA BASE DE DATOS
+conectarDB().then(()=>{
+    app.listen(port,  () => {
+        console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
+    })
 })
