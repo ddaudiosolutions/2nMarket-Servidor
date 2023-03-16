@@ -30,7 +30,7 @@ app.use('/api/buscoposts', require('./routes/buscoPost'))//PARA MANEJAR LOS POST
 
 //3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
 //4 CONECTAMOS A LA BASE DE DATOS
-conectarDB().then(()=>{
+conectarDB().then(()=>{console.log('ENTRANDO EN LISTEN PORT')
     app.listen(port,  () => {
         console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
     })
