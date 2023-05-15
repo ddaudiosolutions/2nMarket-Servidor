@@ -17,7 +17,7 @@ const { parser} = require ('../cloudinary')
 //CREAR UN PRODUCTO
 //api/productos
 router.post(
-  "/",
+  "/newproduct",
   auth,   
   // [
   //   check("title", "El nombre es obligatorio").not().isEmpty(),

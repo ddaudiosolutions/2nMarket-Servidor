@@ -9,12 +9,12 @@ const buscoController = require("../controllers/buscoController");
 //api/buscoposts
 
 //CREAR UN POST
-router.post("/", 
+router.post("/newpost", 
 auth, 
 buscoController.crearBuscoPost);
 
 //OBTENER TODOS LOS POSTS
-router.get("/", buscoController.obtenerBuscoPost);
+router.get("/getallposts", buscoController.obtenerBuscoPost);
 
 //OBTENER LOS POSTS DE UN USUARIO
 router.get('/user', 

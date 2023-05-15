@@ -12,7 +12,7 @@ const multer = require('multer')
 //api/usuarios
 
 router.post(
-  "/",
+  "/newuser",
   [
     //INTRODUCIMOS COMO UN ARREGLO, TODOS LOS VALIDADORES QUE QUERAMOS CON EXPRESS-VALIDATOR CHECK
     check("nombre", "El nombre es obligatorio").not().isEmpty(),
