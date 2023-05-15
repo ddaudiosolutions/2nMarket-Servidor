@@ -1,5 +1,6 @@
 const User = require("../models/User.js");
 const Avatar = require("../models/Avatar.js");
+const registerEmail = require('../helpers/registerEmail.js');
 const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator"); //usamos esto para validar lo que hemos programado en userRoutes con check
 const jwt = require("jsonwebtoken");
@@ -7,12 +8,13 @@ const cloudinary = require("cloudinary").v2;
 
 exports.crearUsuario = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
+  console.log(req.body)
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password } = req.body; //destructuramos para llamar a los datos
+  const { email, password, nombre } = req.body; //destructuramos para llamar a los datos
 
   try {
     let user = await User.findOne({ email });
@@ -27,15 +29,13 @@ exports.crearUsuario = async (req, res, next) => {
     user.password = await bcryptjs.hash(password, salt);
 
     //CREAMOS UN OBJETO VACIO EN EL ARRAY DE LAS IMAGESAVATAR
-    user.imagesAvatar = {
-      
-    }
+    user.imagesAvatar = {}
     //CREANDO EL USUARIO
-    await user.save();
+   const userRegistered = await user.save();
+   console.log(userRegistered)
+    registerEmail({email, nombre, });
 
-    res.status(200).send({ msg: "usuario creado correctamente" });
-
-    
+    res.status(200).send({ msg: "usuario creado correctamente" });    
   } catch (error) {
     res.status(400).json({ msg: "Error en el sistema" });
   }

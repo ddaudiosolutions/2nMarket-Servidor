@@ -21,6 +21,7 @@ exports.crearBuscoPost = async (req, res)=> {
 }
 
 exports.obtenerBuscoPost = async (req, res)=> {
+  console.log('BUSCANDO POSTS')
   //REVISAR SI HAY ERRORES
 const errors = validationResult(req);
 if (!errors.isEmpty()) {
