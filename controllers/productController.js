@@ -13,18 +13,12 @@ exports.crearProducto = async (req, res, next) => {
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-    //PARA SUBIR UNA SOLA IMAGEN
-    // producto.images = {
-    //   url: req.file.path,
-    //   filename: req.file.filename,
-    // };
 
     //PARA SUBIR VARIAS IMAGENES
     producto.images = req.files.map((f) => ({
       url: f.path,
       filename: f.filename,
     }));
-    console.log(producto.images);
     //GUARDAR EL CREADOR VIA JWT
     producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO
 
@@ -48,38 +42,26 @@ exports.obtenerProductos = async (req, res) => {
   if (busqueda === "ultimos_productos") {
     busquedaValue = {};
     limit = 5;
-   // PAGE_SIZE = limit
+    // PAGE_SIZE = limit
   } else {
     busquedaValue = { categoria: busqueda };
-    limit = 10
+    limit = 10;
     //PAGE_SIZE = limit
   }
 
   try {
-
     const PAGE_SIZE = limit;
     const page = parseInt(req.query.page || "0");
     const totalProductos = await Producto.countDocuments(busquedaValue);
     const totalPages = Math.ceil(totalProductos / PAGE_SIZE);
-    
-    // if(busquedaValue === {}){
-    //  const  PAGE_SIZE = 6;
-    //    page = parseInt( "0");
-    //    totalProductos = await Producto.countDocuments(busquedaValue);
-    //    totalPages = 0;
-    // }
 
     const prodAll = await Producto.find(busquedaValue)
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
       .sort({ creado: -1 })
-      .populate({ path: "author", select: "nombre direccion telefono email" });
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
 
-   // console.log(prodAll);
     res.json({ prodAll, totalProductos, totalPages });
-    // const prodAll = await Producto.find(busquedaValue).sort({ creado: -1 }).limit(limit);
-    // res.json({ prodAll });
-    //console.log(totalProductos, totalPages, prodAll);
   } catch (error) {
     //console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -130,23 +112,16 @@ exports.obtenerProductosUser = async (req, res) => {
 // };
 
 exports.obtenerProductosAuthor = async (req, res) => {
-  // const authorid = req.query.authorid
-  //const authorId = req.params
-  //console.log(authorId)
   try {
-    //const PAGE_SIZE = 8;
-    // const page = parseInt(req.query.page || "0");
     const totalProductosAuth = await Producto.countDocuments({
       author: req.params.id,
     });
-    //const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
+
     const prodAuth = await Producto.find({ author: req.params.id })
-      // .limit(PAGE_SIZE)
-      // .skip(PAGE_SIZE * page)
       .sort({
         creado: -1,
       })
-      .populate({ path: "author", select: "nombre  email imagesAvatar " });
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
 
     console.log(prodAuth, totalProductosAuth);
     res.send({ prodAuth, totalProductosAuth });
@@ -164,7 +139,7 @@ exports.obtenerProductoId = async (req, res) => {
       select: "nombre direccion telefono email imagesAvatar",
     });
 
-    res.json({ productoId });
+    res.json(productoId);
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -185,7 +160,6 @@ exports.obtenerProductoEditar = async (req, res) => {
 };
 
 //EDITAR UN PRODUCTO
-
 
 exports.editarProductoUser = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -245,13 +219,14 @@ exports.editarProductoUser = async (req, res, next) => {
 
     //ACTUALIZAR PRODUCTO
     const producto = await Producto.findByIdAndUpdate(
-      req.params.id, 
+      req.params.id,
       {
-      '$pull': {"images":  {"filename": imagesDelete }}, 
-      '$set': {title, categoria, subCategoria, price, description, contacto}},     
-      {new: true}
-    );    
-    
+        $pull: { images: { filename: imagesDelete } },
+        $set: { title, categoria, subCategoria, price, description, contacto },
+      },
+      { new: true }
+    );
+
     const images = req.files.map((f) => ({
       url: f.path,
       filename: f.filename,

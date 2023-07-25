@@ -4,8 +4,10 @@ const router = express.Router();
 const { check } = require("express-validator");
 const authController = require("../controllers/authController");
 const auth = require("../middleware/auth");
+const dotenv = require('dotenv')
+dotenv.config()
 //validar UN USUARIO
-//api/AUTH
+//api/auth
 
 router.post(
   "/",
@@ -19,9 +21,9 @@ router.post(
   authController.autenticarUser
 );
 
-router.get(
-  "/", 
-  auth, 
-  authController.usuarioAutenticado);
+router.get("/", auth, authController.usuarioAutenticado);
+
+router.post("/resetPassword", authController.forgotPassword);
+router.post("/changePasswordUser", authController.changePasswordUser);
 
 module.exports = router;

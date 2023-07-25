@@ -4,6 +4,7 @@ const registerEmail = require('../helpers/registerEmail.js');
 const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator"); //usamos esto para validar lo que hemos programado en userRoutes con check
 const jwt = require("jsonwebtoken");
+
 const cloudinary = require("cloudinary").v2;
 
 exports.crearUsuario = async (req, res, next) => {
@@ -31,42 +32,67 @@ exports.crearUsuario = async (req, res, next) => {
     //CREAMOS UN OBJETO VACIO EN EL ARRAY DE LAS IMAGESAVATAR
     user.imagesAvatar = {}
     //CREANDO EL USUARIO
-   const userRegistered = await user.save();
-   console.log(userRegistered)
-    registerEmail({email, nombre, });
+    const userRegistered = await user.save();
+    console.log('userRegistered', userRegistered)
 
-    res.status(200).send({ msg: "usuario creado correctamente" });    
+    //Enviar Email de confiramción
+    registerEmail({ email, nombre, token: userRegistered._id });
+
+    res.status(200).send({ msg: "usuario creado correctamente" });
   } catch (error) {
     res.status(400).json({ msg: "Error en el sistema" });
   }
 };
 
-exports.obtenerUsuario = async (req, res) => {
+
+
+/* exports.confirmarUsuario = async (req, res) => {
+  const { token } = req.params;
+
+  const usuarioConfirmar = await Veterinario.findOne({ token });
+
+  if (!usuarioConfirmar) {
+    const error = new Error("Token no válido");
+    return res.status(404).json({ msg: error.message });
+  }
+
   try {
-    const userGet = await User.findById(req.params.id);
-    //console.log(userGet.imagesAvatar[0]._id)
-    res.send(userGet);
+    usuarioConfirmar.token = null;
+    usuarioConfirmar.confirmado = true;
+    await usuarioConfirmar.save();
+
+    res.json({ msg: "Usuario Confirmado Correctamente" });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Hubo un Error");
+  }
+}; */
+
+exports.obtenerUsuario = async (req, res) => {
+  console.log('req.params.id', req.params.id);
+  try {
+    const userGet = await User.findById(req.params.id);
+    console.log(userGet)
+    //console.log(userGet.imagesAvatar[0]._id)
+    return res.status(200).send(userGet);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Hubo un Error");
   }
 };
 
 exports.editarUsuario = async (req, res) => {
-  // console.log(req.params.id);
-  // console.log(req.files);
-  //console.log(req.body.nombre);
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
+  console.log('req.body', req.body);
+  console.log('req.params.id', req.params.id)
 
   let dataBody = {
     nombre: req.body.nombre,
     email: req.body.email,
     telefono: req.body.telefono,
-    direccion: req.body.direccion,        
+    direccion: req.body.direccion,
     ...(typeof req.file !== "undefined" && {
       imagesAvatar: {
         url: req.file.path,
@@ -74,7 +100,7 @@ exports.editarUsuario = async (req, res) => {
       },
     }),
   };
-  console.log(dataBody)
+  console.log('dataBody', dataBody)
   try {
     //REVISAR EL USUARIO
     const userTest = await User.findById(req.params.id);
@@ -89,7 +115,7 @@ exports.editarUsuario = async (req, res) => {
     if (userTest.id !== req.user.id) {
       return res.status(401).json({ msg: "No Estás Autorizado para Editar" });
     }
-   // console.log(userTest.imagesAvatar[0]._id)
+    // console.log(userTest.imagesAvatar[0]._id)
     //BORRAR EL AVATAR DE CLOUDINARY EN CASO DE SUBIR UNO NUEVO
     if (req.file && (userTest.imagesAvatar[0].filename)) {
       await cloudinary.uploader.destroy(
@@ -125,7 +151,7 @@ exports.editarUsuario = async (req, res) => {
     //   };    
 
     // console.log(user.imagesAvatar);
-     res.json({ user });
+    res.json({ user });
     // await user.save();
   } catch (error) {
     console.log(error);
@@ -239,7 +265,7 @@ exports.eliminarUsuario = async (req, res) => {
 
     //ELIMINAR EL USUARIO
     usuario = await User.findByIdAndDelete(req.params.id);
-    
+
     //ITERAMOS SOBRE LAS IMAGENES PARA TOMAR EL NOMBRE DE CADA IMAGEN Y BORRARLA EN CLOUDINARY
     // for(let imagesAvatar of usuario.imagesAvatar){   
     //    cloudinary.uploader.destroy(
@@ -257,8 +283,8 @@ exports.eliminarUsuario = async (req, res) => {
     //     }
     //   );}   
 
-      
-    
+
+
 
     res.json({ msg: "USUARIO ELIMINADO" });
   } catch (error) {

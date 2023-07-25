@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const users = require("../controllers/userController");
 const { check } = require("express-validator");
-const {   storage2} = require ('../cloudinary')
-const dotenv = require ('dotenv')
- dotenv.config()
+const { storage2 } = require('../cloudinary')
+const dotenv = require('dotenv')
+dotenv.config()
 const auth = require("../middleware/auth");
 const multer = require('multer')
 
@@ -27,34 +27,19 @@ router.post(
 
 
 //OBTENER DATOS DE USUARIO
-router.get("/:id", 
-auth, 
-users.obtenerUsuario,
-);
+router.get("/:id", auth, users.obtenerUsuario);
 
 //ACTUALIZAR DATOS DE USUARIO
-router.put("/editar/:id", 
-auth, 
-multer({storage: storage2}).single("imagesAvatar"),
-users.editarUsuario
+router.put("/editar/:id",
+  auth,
+  multer({ storage: storage2 }).single("imagesAvatar"),
+  users.editarUsuario
 );
 
-// router.post('/avatar/:id',
-// auth,
-// parser.single('imagesAvatar'),
-// users.crearAvatar
-// );
-
-// router.get('/avatar/:id',
-// //auth,
-// users.obtenerAvatar)
-router.delete('/:id',
-auth, 
-users.eliminarUsuario,
-);
+router.delete('/:id', auth, users.eliminarUsuario);
 
 //OBTENER TODOS LOS USUARIOS
-router.get('/',
-users.obtenerUsuarios);
+router.get('/', users.obtenerUsuarios);
+
 
 module.exports = router;

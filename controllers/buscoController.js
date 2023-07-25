@@ -1,66 +1,65 @@
 const BuscoModel = require("../models/BuscoModel");
 const { validationResult } = require("express-validator");
 
-exports.crearBuscoPost = async (req, res)=> {
-    //REVISAR SI HAY ERRORES
+exports.crearBuscoPost = async (req, res) => {
+  //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).send({ errors: errors.array() });
   }
-    try{
-        const buscoPost = new BuscoModel(req.body)
-        buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
-        await buscoPost.save()
-        res.status(201).send({buscoPost})
+  try {
+    const buscoPost = new BuscoModel(req.body)
+    buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
+    await buscoPost.save()
+    res.status(201).send({ buscoPost })
 
 
-    }catch (error){
-        console.log(error)
-        res.status(500).send({error:'Hubo un error'})
-    }
-}
-
-exports.obtenerBuscoPost = async (req, res)=> {
-  console.log('BUSCANDO POSTS')
-  //REVISAR SI HAY ERRORES
-const errors = validationResult(req);
-if (!errors.isEmpty()) {
-  return res.status(400).send({ errors: errors.array() });
-}
-  try{
-      const obtenerBuscoPost = await BuscoModel.find({})
-      .sort({creado: -1})
-      .populate({ path: "author", select: "nombre direccion telefono email" })
-      //buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
-      //await buscoPost.save()
-      res.status(200).send({obtenerBuscoPost})
-
-
-  }catch (error){
-      console.log(error)
-      res.status(500).send({error:'Hubo un error'})
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({ error: 'Hubo un error' })
   }
 }
 
-exports.obtenerBuscoPostUser = async (req, res)=> {
+exports.obtenerBuscoPost = async (req, res) => {
+  console.log('BUSCANDO POSTS')
   //REVISAR SI HAY ERRORES
-const errors = validationResult(req);
-if (!errors.isEmpty()) {
-  return res.status(400).send({ errors: errors.array() });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).send({ errors: errors.array() });
+  }
+  try {
+    const obtenerBuscoPost = await BuscoModel.find({})
+      .sort({ creado: -1 })
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" })
+    //buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
+    //await buscoPost.save()
+    res.status(200).send({ obtenerBuscoPost })
+
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({ error: 'Hubo un error' })
+  }
 }
-  try{
-      const obtenerBuscoPostUser = await BuscoModel.find({author: req.user.id})
-      .sort({creado: -1})
-      .populate({ path: "author", select: "nombre direccion telefono email" })
-          
-      
-      //await buscoPost.save()
-      res.status(200).send({obtenerBuscoPostUser})
+
+exports.obtenerBuscoPostUser = async (req, res) => {
+  console.log('parammmm', req.params)
+  //REVISAR SI HAY ERRORES
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).send({ errors: errors.array() });
+  }
+  try {
+    const obtenerBuscoPostUser = await BuscoModel.find({ author: req.params.id })
+      .sort({ creado: -1 })
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" })
+    //await buscoPost.save()
+    res.status(200).send({ obtenerBuscoPostUser })
 
 
-  }catch (error){
-      console.log(error)
-      res.status(500).send({error:'Hubo un error'})
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({ error: 'Hubo un error' })
   }
 }
 
@@ -69,9 +68,9 @@ exports.obtenerBuscoPostId = async (req, res) => {
   try {
     const buscoPostId = await BuscoModel.findById(req.params.id)
       .populate({
-      path: "author",
-      select: "nombre direccion telefono email imagesAvatar",
-    });
+        path: "author",
+        select: "nombre direccion telefono email imagesAvatar",
+      });
 
     res.json({ buscoPostId });
   } catch (error) {
@@ -86,7 +85,7 @@ exports.obtenerBuscoPostEditar = async (req, res) => {
     const buscoPostEditar = await BuscoModel.findById(req.params.id);
     console.log(req.user.id);
     console.log(buscoPostEditar.author)
-    if(buscoPostEditar.author.toString() !== req.user.id){
+    if (buscoPostEditar.author.toString() !== req.user.id) {
       return res.status(401).json({ msg: "No Autorizado para Editar" });
     }
     console.log("el producto :" + buscoPostEditar);
@@ -127,11 +126,11 @@ exports.editarBuscoPost = async (req, res, next) => {
 
     //ACTUALIZAR PRODUCTO
     const buscoPost = await BuscoModel.findByIdAndUpdate(
-      req.params.id, 
-      {  $set: req.body},     
-      {new: true}
-    );  
-    res.status(200).json({ msg:'PRODUTO ACTUALIZADO'});
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.status(200).json({ msg: 'PRODUTO ACTUALIZADO' });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -139,12 +138,12 @@ exports.editarBuscoPost = async (req, res, next) => {
 };
 
 //BORRAR UN POST
-exports.deleteBuscoPost = async (req,res) => {
+exports.deleteBuscoPost = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  try{
+  try {
 
     //REVISAR EL ID
     let buscoPost = await BuscoModel.findById(req.params.id);
@@ -161,13 +160,13 @@ exports.deleteBuscoPost = async (req,res) => {
     }
 
     deleteBuscoPost = await BuscoModel.findByIdAndDelete(req.params.id)
-    res.status(200).json({msg: 'BUSCOPOST ELIMINADO'})
+    res.status(200).json({ msg: 'BUSCOPOST ELIMINADO' })
 
-  }catch(error){
+  } catch (error) {
     console.log(error)
     res.status(500).send('HUBO UN ERROR')
   }
 
- 
+
 
 }

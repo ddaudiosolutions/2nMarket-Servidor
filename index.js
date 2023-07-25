@@ -1,21 +1,17 @@
 const express = require('express');
 
-const conectarDB = require ('./config/db')
-const cors = require ('cors')
+const conectarDB = require('./config/db')
+const cors = require('cors')
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
-// const path = require('path');
-
-
-//app.use(cors({ credentials: true, origin: true }));
 app.options("*", cors());
 app.use(cors())
 // HABILITAR EXPRESS.JSON
-app.use(express.json({extended: true}));
-app.use(express.urlencoded({extended:true}))
+app.use(express.json({ extended: true }));
+app.use(express.urlencoded({ extended: true }))
 //app.use(multer())
-    
+
 //2 PUERTO DE LA APP
 const port = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
 
@@ -30,8 +26,9 @@ app.use('/api/buscoposts', require('./routes/buscoPost'))//PARA MANEJAR LOS POST
 
 //3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
 //4 CONECTAMOS A LA BASE DE DATOS
-conectarDB().then(()=>{console.log('ENTRANDO EN LISTEN PORT hola')
-    app.listen(port,  () => {
-        console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
-    })
+conectarDB().then(() => {
+  console.log('ENTRANDO EN LISTEN PORT hola')
+  app.listen(port, () => {
+    console.log(`Corriendo SERVIDOR en PORT:  ${port}`)
+  })
 })
