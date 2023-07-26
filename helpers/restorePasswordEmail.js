@@ -13,10 +13,13 @@ const restorePasswordEmail = async (datos) => {
         <p>Si tu no has registrado una cuenta en WindyMarket, no hagas caso de este correo, debe haber sido un error. 
         Disculpa las molestias </p>`,
   };
-  const info = await transporter.sendMail(mailData);
-
-  console.log("mensaje: %s", info.messageId);
-  return info;
+  await transporter.sendMail(mailData, (err, info) => {
+    if (err) {
+      throw new Error(`${err}`);
+    } else {
+      return console.log(JSON.stringify(info));
+    }
+  });
 };
 
 module.exports = restorePasswordEmail;
