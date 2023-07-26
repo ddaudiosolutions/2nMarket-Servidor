@@ -4,7 +4,7 @@ const restorePasswordEmail = async (datos) => {
   const { nombre, email, id } = datos;
   console.log("DATOS MAIL", datos);
   const mailData = {
-    from: "windymarket@windymarket.es",
+    from: "david.cladera@gmail.com",
     to: email,
     subject: "Recupera tu Contraseña",
     text: "Recupera tu Contraseña",
