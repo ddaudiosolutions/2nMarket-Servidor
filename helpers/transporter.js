@@ -4,8 +4,7 @@ const transporter = nodemailer.createTransport({
   name: "hostgator",
   host: process.env.EMAIL_HOST,
   port: 465,
-  service: "hostgator",
-  secure: false,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
