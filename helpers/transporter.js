@@ -3,7 +3,8 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   /*  name: "hostgator", */
   host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
+  port: 587,
+  service: "hostgator",
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
