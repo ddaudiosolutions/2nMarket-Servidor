@@ -15,6 +15,7 @@ const restorePasswordEmail = async (datos) => {
   };
   transporter.sendMail(mailData, (err, info) => {
     if (err) {
+      console.log("error : " + JSON.stringify(err));
       throw new Error(`${err}`);
     } else {
       return console.log(JSON.stringify(info));
