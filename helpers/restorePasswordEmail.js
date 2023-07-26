@@ -1,6 +1,6 @@
 const transporter = require("./transporter");
 
-const restorePasswordEmail = async (datos) => {
+const restorePasswordEmail = /* async */ (datos) => {
   const { nombre, email, id } = datos;
   console.log("DATOS MAIL", datos);
   const mailData = {
@@ -13,12 +13,22 @@ const restorePasswordEmail = async (datos) => {
         <p>Si tu no has registrado una cuenta en WindyMarket, no hagas caso de este correo, debe haber sido un error. 
         Disculpa las molestias </p>`,
   };
-  await transporter.sendMail(mailData, (err, info) => {
+  /* await transporter.sendMail(mailData, (err, info) => {
     if (err) {
       throw new Error(`${err}`);
     } else {
       return console.log(JSON.stringify(info));
     }
+  }); */
+  new Promise((resolve, reject) => {
+    transporter.sendMail(mailData, function (error, response) {
+      if (error) {
+        reject(error);
+      } else {
+        console.log(JSON.stringify(response));
+        resolve("email sent");
+      }
+    });
   });
 };
 
