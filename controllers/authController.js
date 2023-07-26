@@ -41,14 +41,12 @@ exports.autenticarUser = async (req, res) => {
     let token = jwt.sign(payload, process.env.SECRETA, {
       expiresIn: 43200, //12 horas convertido a segundos
     });
-    res
-      .status(200)
-      .send({
-        accessToken: token,
-        errors: "Usuario Loggeado Correctamente",
-        nombre: usernombre,
-        id: userId,
-      });
+    res.status(200).send({
+      accessToken: token,
+      errors: "Usuario Loggeado Correctamente",
+      nombre: usernombre,
+      id: userId,
+    });
   } catch (error) {
     res.status(401).send({ error: "Wrong user or Password" });
   }
@@ -79,7 +77,7 @@ exports.forgotPassword = async (req, res) => {
         email,
         nombre: user.nombre,
       });
-
+      console.log("RESSSSS:", res.status);
       return res.status(200).json({ msg: "Hemos enviado un email con las instrucciones" });
     } catch (error) {
       console.log(error);
