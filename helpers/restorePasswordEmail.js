@@ -18,7 +18,7 @@ const restorePasswordEmail = /* async */ (datos) => {
       if (error) {
         reject(error);
       } else {
-        console.log(JSON.stringify(response));
+        console.log("DEVOLUCION", JSON.stringify(response));
         resolve("email sent");
       }
     });
