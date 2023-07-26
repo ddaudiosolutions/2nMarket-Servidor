@@ -35,6 +35,7 @@ exports.crearProducto = async (req, res, next) => {
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
+  console.log("OBTENIENDO PRODUCTOS");
   let busqueda = req.query.busqueda;
   // console.log('la busqueda es:  ' + busqueda);
   let busquedaValue = {};

@@ -8,20 +8,18 @@ exports.crearBuscoPost = async (req, res) => {
     return res.status(400).send({ errors: errors.array() });
   }
   try {
-    const buscoPost = new BuscoModel(req.body)
-    buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
-    await buscoPost.save()
-    res.status(201).send({ buscoPost })
-
-
+    const buscoPost = new BuscoModel(req.body);
+    buscoPost.author = req.user.id; //COMPROBAMOS QUE SEA EL MISMO AUTOR
+    await buscoPost.save();
+    res.status(201).send({ buscoPost });
   } catch (error) {
-    console.log(error)
-    res.status(500).send({ error: 'Hubo un error' })
+    console.log(error);
+    res.status(500).send({ error: "Hubo un error" });
   }
-}
+};
 
 exports.obtenerBuscoPost = async (req, res) => {
-  console.log('BUSCANDO POSTS')
+  console.log("BUSCANDO POSTS");
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -30,20 +28,16 @@ exports.obtenerBuscoPost = async (req, res) => {
   try {
     const obtenerBuscoPost = await BuscoModel.find({})
       .sort({ creado: -1 })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" })
-    //buscoPost.author = req.user.id //COMPROBAMOS QUE SEA EL MISMO AUTOR
-    //await buscoPost.save()
-    res.status(200).send({ obtenerBuscoPost })
-
-
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
+    res.status(200).send({ obtenerBuscoPost });
   } catch (error) {
-    console.log(error)
-    res.status(500).send({ error: 'Hubo un error' })
+    console.log(error);
+    res.status(500).send({ error: "Hubo un error" });
   }
-}
+};
 
 exports.obtenerBuscoPostUser = async (req, res) => {
-  console.log('parammmm', req.params)
+  console.log("parammmm", req.params);
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -52,25 +46,22 @@ exports.obtenerBuscoPostUser = async (req, res) => {
   try {
     const obtenerBuscoPostUser = await BuscoModel.find({ author: req.params.id })
       .sort({ creado: -1 })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" })
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
     //await buscoPost.save()
-    res.status(200).send({ obtenerBuscoPostUser })
-
-
+    res.status(200).send({ obtenerBuscoPostUser });
   } catch (error) {
-    console.log(error)
-    res.status(500).send({ error: 'Hubo un error' })
+    console.log(error);
+    res.status(500).send({ error: "Hubo un error" });
   }
-}
+};
 
 //OBTENER POST POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerBuscoPostId = async (req, res) => {
   try {
-    const buscoPostId = await BuscoModel.findById(req.params.id)
-      .populate({
-        path: "author",
-        select: "nombre direccion telefono email imagesAvatar",
-      });
+    const buscoPostId = await BuscoModel.findById(req.params.id).populate({
+      path: "author",
+      select: "nombre direccion telefono email imagesAvatar",
+    });
 
     res.json({ buscoPostId });
   } catch (error) {
@@ -84,7 +75,7 @@ exports.obtenerBuscoPostEditar = async (req, res) => {
   try {
     const buscoPostEditar = await BuscoModel.findById(req.params.id);
     console.log(req.user.id);
-    console.log(buscoPostEditar.author)
+    console.log(buscoPostEditar.author);
     if (buscoPostEditar.author.toString() !== req.user.id) {
       return res.status(401).json({ msg: "No Autorizado para Editar" });
     }
@@ -95,8 +86,6 @@ exports.obtenerBuscoPostEditar = async (req, res) => {
     res.status(500).send("Hubo un Error");
   }
 };
-
-
 
 //EDITAR UN POST
 exports.editarBuscoPost = async (req, res, next) => {
@@ -123,14 +112,13 @@ exports.editarBuscoPost = async (req, res, next) => {
       return res.status(401).json({ msg: "No Autorizado para Editar" });
     }
 
-
     //ACTUALIZAR PRODUCTO
     const buscoPost = await BuscoModel.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
       { new: true }
     );
-    res.status(200).json({ msg: 'PRODUTO ACTUALIZADO' });
+    res.status(200).json({ msg: "PRODUTO ACTUALIZADO" });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
@@ -144,7 +132,6 @@ exports.deleteBuscoPost = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
-
     //REVISAR EL ID
     let buscoPost = await BuscoModel.findById(req.params.id);
     //console.log(buscoPost);
@@ -159,14 +146,10 @@ exports.deleteBuscoPost = async (req, res) => {
       return res.status(401).json({ msg: "No Autorizado para Eliminar" });
     }
 
-    deleteBuscoPost = await BuscoModel.findByIdAndDelete(req.params.id)
-    res.status(200).json({ msg: 'BUSCOPOST ELIMINADO' })
-
+    deleteBuscoPost = await BuscoModel.findByIdAndDelete(req.params.id);
+    res.status(200).json({ msg: "BUSCOPOST ELIMINADO" });
   } catch (error) {
-    console.log(error)
-    res.status(500).send('HUBO UN ERROR')
+    console.log(error);
+    res.status(500).send("HUBO UN ERROR");
   }
-
-
-
-}
+};
