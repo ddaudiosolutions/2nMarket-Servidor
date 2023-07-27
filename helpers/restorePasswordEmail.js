@@ -13,9 +13,8 @@ const restorePasswordEmail = (datos) => {
         <p>Si tu no has registrado una cuenta en WindyMarket, no hagas caso de este correo, debe haber sido un error. 
         Disculpa las molestias </p>`,
   };
-  console.log("TRansporter0", transporter);
+
   transporter.sendMail(mailData, (err, info) => {
-    console.log("TRansporter1", transporter);
     if (err) {
       console.log("error : " + JSON.stringify(err));
       throw new Error(`${err}`);
