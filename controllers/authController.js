@@ -56,34 +56,13 @@ exports.autenticarUser = async (req, res) => {
 exports.usuarioAutenticado = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("password").select("nombre");
-    // console.log(user)
+    console.log("autenticadoUSER", user);
     res.json({ user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Hubo un error" });
   }
 };
-
-/* exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  let user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ msg: "El Usuario no Existe" });
-  } else {
-    try {
-      // Enviar Email con instrucciones
-      restorePasswordEmail({
-        id: user._id,
-        email,
-        nombre: user.nombre,
-      });
-      console.log("RESSSSS:", res.status);
-      return res.status(200).json({ msg: "Hemos enviado un email con las instrucciones" });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-}; */
 
 exports.forgotPassword = async (req, res) => {
   try {

@@ -20,7 +20,8 @@ app.use("/api/usuarios", require("./routes/usersRoutes")); //PARA CREAR USUARIOS
 app.use("/api/auth", require("./routes/auth")); //PARA AUTENTICAR USUARIOS
 app.use("/api/productos", require("./routes/productos")); // PARA MANEJAR LOS PRODUCTOS
 app.use("/api/buscoposts", require("./routes/buscoPost")); //PARA MANEJAR LOS POST DE BUSCO;
-
+app.use("/api/models", require("./routes/models")); //PARA hacer cambios en bbdd mongodb;
+app.use("/api/favoriteProducts", require("./routes/favoriteProducts"));
 //3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
 //4 CONECTAMOS A LA BASE DE DATOS
 conectarDB().then(() => {

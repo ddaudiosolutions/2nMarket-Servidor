@@ -32,17 +32,24 @@ const UserSchema = new Schema({
   },
   direccion: {
     type: String,
-   // required: true,  
+    // required: true,
   },
   registro: {
     type: Date,
     default: Date.now(),
   },
-  imagesAvatar: [{
-    url: String,
-    filename: String    
-  }]
-  
+  imagesAvatar: [
+    {
+      url: String,
+      filename: String,
+    },
+  ],
+  favoritos: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "WindFoilProducts",
+    },
+  ],
 });
 
 //UserSchema.plugin(passportLocalMongoose);
