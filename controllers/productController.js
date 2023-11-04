@@ -62,7 +62,7 @@ exports.obtenerProductos = async (req, res) => {
       .sort({ creado: -1 })
       .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
 
-    res.json({ prodAll, totalProductos, totalPages });
+    res.status(200).json({ prodAll, totalProductos, totalPages });
   } catch (error) {
     //console.log(error);
     res.status(500).send({ error: "Hubo un Error" });
@@ -91,26 +91,6 @@ exports.obtenerProductosUser = async (req, res) => {
     res.status(500).send("Hubo un Error");
   }
 };
-///OBTENER PRODUCTOS USUARIO CON PAGINADOR (DESACTIVADO TEMPORALMENTE)
-// exports.obtenerProductosUser = async (req, res) => {
-//   try {
-//     const PAGE_SIZE = 8;
-//     const page = parseInt(req.query.page || "0");
-//     const totalProductosUs = await Producto.countDocuments({ author: req.user.id });
-//     const totalPagesUs = Math.ceil(totalProductosUs / PAGE_SIZE);
-//     const prodUser = await Producto.find({ author: req.user.id })
-//     .limit(PAGE_SIZE)
-//     .skip(PAGE_SIZE * page)
-//     .sort({
-//       creado: -1,
-//     });
-//     console.log(prodUser, totalProductosUs, totalPagesUs);
-//     res.json({ prodUser, totalProductosUs, totalPagesUs });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send("Hubo un Error");
-//   }
-// };
 
 exports.obtenerProductosAuthor = async (req, res) => {
   try {
@@ -139,7 +119,7 @@ exports.obtenerProductoId = async (req, res) => {
       path: "author",
       select: "nombre direccion telefono email imagesAvatar",
     });
-
+    console.log("productoId", productoId);
     res.json(productoId);
   } catch (error) {
     console.log(error);
@@ -287,6 +267,24 @@ exports.eliminarProducto = async (req, res) => {
     }
 
     res.json({ msg: "PRODUCTO ELIMINADO" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Hubo un Error");
+  }
+};
+
+exports.findProductsByWords = async (req, res) => {
+  let searchWords = req.body.searchWord; // Replace with your array of words
+
+  try {
+    const producto = await Producto.find({
+      title: { $regex: searchWords, $options: "i" },
+    }).populate({
+      path: "author",
+      select: "nombre direccion telefono email imagesAvatar",
+    });
+    console.log("el producto :" + producto);
+    res.status(200).json({ prodAll: producto });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");

@@ -51,7 +51,10 @@ router.put(
   productController.editarProductoUser
 );
 
-//ELIMINAR UN PRODUCTO
+//ELIMINAR UN PRODUCTO c
 router.delete("/user/:id", auth, productController.eliminarProducto);
+
+// OBTENER PRODUCTO POR PALABRAS CLAVE EN BUSCADOR
+router.post("/searchByWords", productController.findProductsByWords);
 
 module.exports = router;
