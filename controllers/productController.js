@@ -278,12 +278,16 @@ exports.findProductsByWords = async (req, res) => {
 
   try {
     const producto = await Producto.find({
-      title: { $regex: searchWords, $options: "i" },
+      $or: [
+        { title: { $regex: searchWords, $options: "i" } },
+        { description: { $regex: searchWords, $options: "i" } },
+        { categoria: { $regex: searchWords, $options: "i" } },
+        { subCategoria: { $regex: searchWords, $options: "i" } },
+      ],
     }).populate({
       path: "author",
       select: "nombre direccion telefono email imagesAvatar",
     });
-    console.log("el producto :" + producto);
     res.status(200).json({ prodAll: producto });
   } catch (error) {
     console.log(error);
