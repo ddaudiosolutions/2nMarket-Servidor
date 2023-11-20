@@ -279,10 +279,10 @@ exports.findProductsByWords = async (req, res) => {
   try {
     const producto = await Producto.find({
       $or: [
-        { title: { $regex: searchWords, $options: "i" } },
-        { description: { $regex: searchWords, $options: "i" } },
-        { categoria: { $regex: searchWords, $options: "i" } },
-        { subCategoria: { $regex: searchWords, $options: "i" } },
+        { title: { $regex: `${searchWords}`, $options: "i" } },
+        { description: { $regex: `${searchWords}`, $options: "i" } },
+        { categoria: { $regex: `${searchWords}`, $options: "i" } },
+        { subCategoria: { $regex: `${searchWords}`, $options: "i" } },
       ],
     }).populate({
       path: "author",
