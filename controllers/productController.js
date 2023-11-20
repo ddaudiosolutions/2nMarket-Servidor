@@ -15,10 +15,47 @@ exports.crearProducto = async (req, res, next) => {
     const producto = new Producto(req.body);
 
     //PARA SUBIR VARIAS IMAGENES
-    producto.images = req.files.map((f) => ({
-      url: f.path,
-      filename: f.filename,
-    }));
+    // Crear un nuevo producto con las imágenes proporcionadas en req.files
+    const images = [];
+
+    // Procesar cada archivo de imagen
+    for (let file of req.files) {
+      const extension = file.originalname.split(".").pop().toLowerCase();
+
+      if (extension === "heic") {
+        console.log("entrando en HEIC", extension);
+        try {
+          // Si es HEIC, aplicar la transformación a JPEG antes de subir a Cloudinary
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "ProductosMarketV2",
+            format: "jpg",
+            transformation: [{ quality: "40" }],
+          });
+
+          images.push({ url: result.secure_url, filename: result.public_id });
+
+          // Eliminar el archivo HEIC de Cloudinary después de la transformación
+          await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
+          console.log(
+            `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`
+          );
+        } catch (error) {
+          console.log(
+            `Error al transformar o eliminar el archivo HEIC ${file.filename} de Cloudinary:`,
+            error
+          );
+          // Manejar el error si la transformación o eliminación falla
+        }
+      } else {
+        console.log("entrando en else", extension);
+        // Si no es HEIC, almacenar la imagen original
+        images.push({ url: file.path, filename: file.filename });
+      }
+    }
+
+    producto.images = images;
+    console.log(producto.images);
+
     //GUARDAR EL CREADOR VIA JWT
     producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO
 
@@ -208,12 +245,33 @@ exports.editarProductoUser = async (req, res, next) => {
       { new: true }
     );
 
-    const images = req.files.map((f) => ({
-      url: f.path,
-      filename: f.filename,
-    }));
+    const images = [];
 
-    //if(producto.images === undefined) return null;
+    // Procesar cada archivo de imagen
+    for (let file of req.files) {
+      const extension = file.originalname.split(".").pop().toLowerCase();
+
+      if (extension === "heic") {
+        console.log("entrando en HEIC", extension);
+        // Si es HEIC, aplicar la transformación a JPEG antes de subir a Cloudinary
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "ProductosMarketV2",
+          format: "jpg",
+          transformation: [{ quality: "40" }],
+        });
+
+        images.push({ url: result.secure_url, filename: result.public_id });
+        // Eliminar el archivo HEIC de Cloudinary después de la transformación
+        await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
+        console.log(
+          `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`
+        );
+      } else {
+        console.log("entrando en else", extension);
+        // Si no es HEIC, mantener la imagen original
+        images.push({ url: file.path, filename: file.filename });
+      }
+    }
     producto.images.push(...images);
     console.log(producto.images);
 

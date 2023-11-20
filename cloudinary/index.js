@@ -15,9 +15,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "ProductosMarketV2",
     allowedFormats: ["jpeg", "png", "jpg"],
-    transformation: [
-      { quality: "auto:best" /* max_bytes: "1000000" */ }, // Ajusta el tamaño máximo en bytes (1MB en este caso)
-    ],
+    transformation: [{ quality: "auto:best" }],
   },
 });
 
