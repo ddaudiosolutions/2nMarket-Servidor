@@ -288,7 +288,7 @@ exports.findProductsByWords = async (req, res) => {
       path: "author",
       select: "nombre direccion telefono email imagesAvatar",
     });
-    res.status(200).json({ prodAll: producto });
+    res.status(200).json({ prodByWords: producto });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
