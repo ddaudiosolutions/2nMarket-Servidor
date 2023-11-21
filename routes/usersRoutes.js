@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const users = require("../controllers/userController");
 const { check } = require("express-validator");
-const { storage2 } = require('../cloudinary')
-const dotenv = require('dotenv')
-dotenv.config()
+const { storage2 } = require("../cloudinary");
+const dotenv = require("dotenv");
+dotenv.config();
 const auth = require("../middleware/auth");
-const multer = require('multer')
+const multer = require("multer");
 
 //CREAR UN USUARIO
 //api/usuarios
@@ -25,21 +25,22 @@ router.post(
   users.crearUsuario
 );
 
-
 //OBTENER DATOS DE USUARIO
 router.get("/:id", auth, users.obtenerUsuario);
 
 //ACTUALIZAR DATOS DE USUARIO
-router.put("/editar/:id",
+router.put(
+  "/editar/:id",
   auth,
   multer({ storage: storage2 }).single("imagesAvatar"),
   users.editarUsuario
 );
 
-router.delete('/:id', auth, users.eliminarUsuario);
+router.delete("/:id", auth, users.eliminarUsuario);
 
 //OBTENER TODOS LOS USUARIOS
-router.get('/', users.obtenerUsuarios);
+router.get("/", users.obtenerUsuarios);
 
+router.post("/correoentreusuarios", users.correoEntreUsuarios);
 
 module.exports = router;
