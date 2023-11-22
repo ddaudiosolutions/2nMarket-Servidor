@@ -29,7 +29,7 @@ exports.crearProducto = async (req, res, next) => {
           const result = await cloudinary.uploader.upload(file.path, {
             folder: "ProductosMarketV2",
             format: "jpg",
-            transformation: [{ quality: "40" }],
+            transformation: [{ quality: calculoReduccionImagen(file.size) }],
           });
 
           images.push({ url: result.secure_url, filename: result.public_id });
@@ -47,9 +47,18 @@ exports.crearProducto = async (req, res, next) => {
           // Manejar el error si la transformación o eliminación falla
         }
       } else {
-        console.log("entrando en else", extension);
-        // Si no es HEIC, almacenar la imagen original
-        images.push({ url: file.path, filename: file.filename });
+        if (file.size > 1000000) {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "ProductosMarketV2",
+            transformation: [{ quality: calculoReduccionImagen(file.size) }],
+          });
+
+          images.push({ url: result.secure_url, filename: result.public_id });
+          await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
+        } else {
+          // Si no es HEIC o no es mayor que 1000000, mantener la imagen original
+          images.push({ url: file.path, filename: file.filename });
+        }
       }
     }
 
@@ -252,12 +261,11 @@ exports.editarProductoUser = async (req, res, next) => {
       const extension = file.originalname.split(".").pop().toLowerCase();
 
       if (extension === "heic") {
-        console.log("entrando en HEIC", extension);
         // Si es HEIC, aplicar la transformación a JPEG antes de subir a Cloudinary
         const result = await cloudinary.uploader.upload(file.path, {
           folder: "ProductosMarketV2",
           format: "jpg",
-          transformation: [{ quality: "40" }],
+          transformation: [{ quality: calculoReduccionImagen(file.size) }],
         });
 
         images.push({ url: result.secure_url, filename: result.public_id });
@@ -267,9 +275,18 @@ exports.editarProductoUser = async (req, res, next) => {
           `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`
         );
       } else {
-        console.log("entrando en else", extension);
-        // Si no es HEIC, mantener la imagen original
-        images.push({ url: file.path, filename: file.filename });
+        if (file.size > 1000000) {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "ProductosMarketV2",
+            transformation: [{ quality: calculoReduccionImagen(file.size) }],
+          });
+
+          images.push({ url: result.secure_url, filename: result.public_id });
+          await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
+        } else {
+          // Si no es HEIC o no es mayor que 1000000, mantener la imagen original
+          images.push({ url: file.path, filename: file.filename });
+        }
       }
     }
     producto.images.push(...images);
@@ -282,7 +299,11 @@ exports.editarProductoUser = async (req, res, next) => {
     res.status(500).send("Hubo un Error");
   }
 };
-
+const calculoReduccionImagen = (fileSize) => {
+  const limiteMaximo = 950000;
+  const quality = Math.floor((limiteMaximo / fileSize) * 100);
+  return String(quality);
+};
 //
 //ELIMINAR UN PRODUCTO
 exports.eliminarProducto = async (req, res) => {

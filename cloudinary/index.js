@@ -15,7 +15,6 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "ProductosMarketV2",
     allowedFormats: ["jpeg", "png", "jpg"],
-    transformation: [{ quality: "auto:best" }],
   },
 });
 
