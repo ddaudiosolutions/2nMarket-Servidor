@@ -4,7 +4,7 @@ const restorePasswordEmail = (datos) => {
   const { nombre, email, id } = datos;
   console.log("DATOS MAIL", datos);
   const mailData = {
-    from: "windymarket@windymarket.es",
+    from: "info@windymarket.es",
     to: email,
     subject: "Recupera tu Contraseña",
     text: "Recupera tu Contraseña",
