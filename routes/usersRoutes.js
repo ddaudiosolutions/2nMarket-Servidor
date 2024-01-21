@@ -11,6 +11,12 @@ const multer = require("multer");
 //CREAR UN USUARIO
 //api/usuarios
 
+//OBTENER TODOS LOS USUARIOS
+router.get("/", users.obtenerUsuarios);
+
+router.post("/correoentreusuarios", users.correoEntreUsuarios);
+router.get("/mailingusuarios", users.mailingUsuarios);
+
 router.post(
   "/newuser",
   [
@@ -37,10 +43,5 @@ router.put(
 );
 
 router.delete("/:id", auth, users.eliminarUsuario);
-
-//OBTENER TODOS LOS USUARIOS
-router.get("/", users.obtenerUsuarios);
-
-router.post("/correoentreusuarios", users.correoEntreUsuarios);
 
 module.exports = router;

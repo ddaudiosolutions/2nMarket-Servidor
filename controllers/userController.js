@@ -6,6 +6,7 @@ const { validationResult } = require("express-validator"); //usamos esto para va
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
+const fs = require("fs");
 
 exports.crearUsuario = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -185,4 +186,22 @@ exports.correoEntreUsuarios = async (req, res) => {
     console.error("Error al enviar el correo:", error);
     res.status(500).send("Error al enviar el correo");
   }
+};
+
+exports.mailingUsuarios = async (req, res) => {
+  User.find({}, "email -_id") // Selecciona solo el campo email y excluye el campo _id
+    .then((usuarios) => {
+      // Extraer solo los emails en un array
+      const emails = usuarios.map((usuario) => usuario.email);
+
+      // Convertir el array en una cadena JSON
+      const jsonEmails = JSON.stringify(emails);
+
+      // Escribir los datos en un archivo .json
+      fs.writeFileSync("./storage/emailsDeUsuarios.json", jsonEmails);
+      res.status(200).send({ msg: `Emails exportados exitosamente ${emails.length}` });
+    })
+    .catch((error) => {
+      console.error("Error al exportar emails: ", error);
+    });
 };
