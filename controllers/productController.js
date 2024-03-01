@@ -1,6 +1,7 @@
 const Producto = require("../models/ProductModel");
 const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
+const transporter = require("../helpers/transporter.js");
 //const mongoose = require("mongoose");
 
 exports.crearProducto = async (req, res, next) => {
@@ -194,8 +195,8 @@ exports.editarProductoUser = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  console.log(req.body);
-  const { imagesDelete, title, categoria, subCategoria, price, description, contacto } = req.body;
+  console.log('editarProductoUser', req.body);
+  const { imagesDelete, title, categoria, subCategoria, price, description, contacto, delivery, balearicDelivery, ancho, largo, alto, peso, precioEstimado, reservado, vendido } = req.body;
 
   try {
     //   //REVISAR EL ID
@@ -249,7 +250,7 @@ exports.editarProductoUser = async (req, res, next) => {
       req.params.id,
       {
         $pull: { images: { filename: imagesDelete } },
-        $set: { title, categoria, subCategoria, price, description, contacto },
+        $set: { title, categoria, subCategoria, price, description, contacto, delivery, ancho, largo, alto, peso, precioEstimado, balearicDelivery, reservado, vendido },
       },
       { new: true }
     );
@@ -371,5 +372,81 @@ exports.findProductsByWords = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
+  }
+};
+
+exports.envioPegatinas = async (req, res) => {
+  const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
+  console.log('gestionPegatinas', req.body);
+  try {
+    // Configuración del correo electrónico
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
+      to: sellerEmail, // Cambia esto para enviar al vendedor
+      subject: `Petición de pegatinas para envio`,
+      html: `<p>Saludos, ${sellerName}</p>
+            <p>${message.NombreRemi} necesita las pegatinas para el envio de un producto</p>
+            <h3>SusDatos:</h3><br>
+            <h4>Remitente: </h4>
+            <h5>${message.NombreRemi}</h5>
+            <h5>${message.DireccionRemi}</h5>
+            <h5>${message.PoblacionCPRemi}</h5>
+            <h5>${message.TelefonoRemi}</h5>
+            <h5>${message.EmailRemi}</h5><br>
+            <h4>Destinatario: </h4>
+            <h5>${message.NombreDesti}</h5>
+            <h5>${message.DireccionDesti}</h5>
+            <h5>${message.PoblacionCPDesti}</h5>
+            <h5>${message.TelefonoDesti}</h5>
+            <h5>${message.EmailDesti}</h5>            
+            `
+         };
+
+    // Enviar el correo electrónico
+    await transporter.sendMail(mailOptions);
+
+    // Respuesta exitosa
+    res.status(200).send("Correo enviado correctamente");
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+    res.status(500).send("Error al enviar el correo");
+  }
+};
+
+exports.editReservedState = async (req, res) => {
+  const { productId, reservado } = req.body;
+  console.log('editReservedState', req.body);
+  try {
+    // Actualizar el estado reservado del producto
+    const producto = await Producto.findByIdAndUpdate(
+      productId,
+      { $set: { reservado: reservado } },
+      { new: true }
+    );
+
+    // Respuesta exitosa
+    res.status(200).json({ producto });
+  } catch (error) {
+    console.error("Error al actualizar el estado reservado:", error);
+    res.status(500).send("Error al actualizar el estado reservado");
+  }
+};
+
+exports.editVendidoState = async (req, res) => {
+  const { productId, vendido } = req.body;
+  console.log('editVendidoState', req.body);
+  try {
+    // Actualizar el estado reservado del producto
+    const producto = await Producto.findByIdAndUpdate(
+      productId,
+      { $set: { vendido: vendido } },
+      { new: true }
+    );
+
+    // Respuesta exitosa
+    res.status(200).json({ producto });
+  } catch (error) {
+    console.error("Error al actualizar el estado reservado:", error);
+    res.status(500).send("Error al actualizar el estado reservado");
   }
 };
