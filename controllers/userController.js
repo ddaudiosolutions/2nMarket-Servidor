@@ -162,7 +162,7 @@ exports.eliminarUsuario = async (req, res) => {
 
 exports.correoEntreUsuarios = async (req, res) => {
   const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
-  console.log(req.body);
+  console.log('correoEntreUsuarios', req.body);
   try {
     // Configuración del correo electrónico
     const mailOptions = {

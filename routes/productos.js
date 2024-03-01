@@ -57,4 +57,13 @@ router.delete("/user/:id", auth, productController.eliminarProducto);
 // OBTENER PRODUCTO POR PALABRAS CLAVE EN BUSCADOR
 router.post("/searchByWords", productController.findProductsByWords);
 
+// ENVIO DE CORREO PARA OBTENER PEGATINAS TRANSPORTE
+router.post('/envioPegatinas', productController.envioPegatinas);
+
+// HANDLE ESTADO RESERVADO
+router.post('/editReservedState', productController.editReservedState); 
+
+// HANDLE ESTADO VENDIDO
+router.post('/editVendidoState', productController.editVendidoState); 
+
 module.exports = router;
