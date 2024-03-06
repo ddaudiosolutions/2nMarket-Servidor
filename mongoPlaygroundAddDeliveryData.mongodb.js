@@ -10,17 +10,39 @@
 // https://www.mongodb.com/docs/mongodb-vscode/playgrounds/
 
 // Select the database to use.
-/* use('merReactMarketLocal'); */
-use('mernReactMarket');
+ /* use('merReactMarketLocal')  */
+  use('mernReactMarket');  
 
 // Insert a few documents into the sales collection.
 /* db.getCollection('windfoilproducts').updateMany({},
   {
     $set: {alto: 0, ancho: 0, largo: 0, pesoVolumetrico: 0, precioEstimado: 0, delivery: false}
   }); */
-db.getCollection('windfoilproducts').updateMany({},
+ /* db.getCollection('users').updateMany({},
   {
-    $set: {alto: 0, ancho: 0, largo: 0, pesoVolumetrico: 0, precioEstimado: 0, delivery: false, balearicDelivery: false, reservado: false, vendido: false}
-  });
+    $unset: {direccion: '', poblacion_CP: ''}
+  }); */ 
+  db.getCollection('users').updateMany(
+    {
+      "direccion": { $exists: false }
+    },
+    {
+      $set: { "direccion": '' }
+    }
+  );
+  
+  // Añade 'poblacion_CP' solo si no existe
+  db.getCollection('users').updateMany(
+    {
+      "poblacion_CP": { $exists: false }
+    },
+    {
+      $set: { "poblacion_CP": '' }
+    }
+  );
+/* db.getCollection('windfoilproducts').updateMany({},
+  {
+    $set: {pesoKgs: 0}
+  }); */
 
 

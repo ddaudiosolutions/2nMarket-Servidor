@@ -66,6 +66,7 @@ exports.editarUsuario = async (req, res) => {
     email: req.body.email,
     telefono: req.body.telefono,
     direccion: req.body.direccion,
+    poblacion_CP: req.body.poblacion_CP,
     ...(typeof req.file !== "undefined" && {
       imagesAvatar: {
         url: req.file.path,

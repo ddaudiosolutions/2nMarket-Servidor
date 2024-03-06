@@ -32,6 +32,9 @@ const windfoilproductSchema = new Schema({
   pesoVolumetrico: {
     type: Number,
   },
+  pesoKgs: {
+    type: Number,
+  },
   precioEstimado: {
     type: Number,
   },

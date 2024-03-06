@@ -34,6 +34,10 @@ const UserSchema = new Schema({
     type: String,
     // required: true,
   },
+  poblacion_CP: {
+    type: String,
+    // required: true,
+  },
   registro: {
     type: Date,
     default: Date.now(),

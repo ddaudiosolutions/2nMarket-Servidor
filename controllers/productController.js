@@ -220,7 +220,25 @@ exports.editarProductoUser = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
   console.log('editarProductoUser', req.body);
-  const { imagesDelete, title, categoria, subCategoria, price, description, contacto, delivery, balearicDelivery, ancho, largo, alto, peso, precioEstimado, reservado, vendido } = req.body;
+  const { 
+    imagesDelete, 
+    title, 
+    categoria, 
+    subCategoria, 
+    price, 
+    description, 
+    contacto, 
+    delivery, 
+    balearicDelivery, 
+    ancho, 
+    largo, 
+    alto, 
+    pesoVolumetrico, 
+    pesoKgs, 
+    precioEstimado, 
+    reservado, 
+    vendido 
+  } = req.body;
 
   try {
     //   //REVISAR EL ID
@@ -274,7 +292,7 @@ exports.editarProductoUser = async (req, res, next) => {
       req.params.id,
       {
         $pull: { images: { filename: imagesDelete } },
-        $set: { title, categoria, subCategoria, price, description, contacto, delivery, ancho, largo, alto, peso, precioEstimado, balearicDelivery, reservado, vendido },
+        $set: { title, categoria, subCategoria, price, description, contacto, delivery, ancho, largo, alto, pesoVolumetrico, pesoKgs, precioEstimado, balearicDelivery, reservado, vendido },
       },
       { new: true }
     );
@@ -443,29 +461,35 @@ exports.findProductsByWords = async (req, res) => {
 };
 
 exports.envioPegatinas = async (req, res) => {
-  const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
+  const { message } = req.body;
   console.log('gestionPegatinas', req.body);
   try {
     // Configuración del correo electrónico
     const mailOptions = {
       from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
-      to: sellerEmail, // Cambia esto para enviar al vendedor
+      to: 'info@windymarket.es', // Cambia esto para enviar al vendedor
       subject: `Petición de pegatinas para envio`,
-      html: `<p>Saludos, ${sellerName}</p>
-            <p>${message.NombreRemi} necesita las pegatinas para el envio de un producto</p>
-            <h3>SusDatos:</h3><br>
-            <h4>Remitente: </h4>
-            <h5>${message.NombreRemi}</h5>
-            <h5>${message.DireccionRemi}</h5>
-            <h5>${message.PoblacionCPRemi}</h5>
-            <h5>${message.TelefonoRemi}</h5>
-            <h5>${message.EmailRemi}</h5><br>
-            <h4>Destinatario: </h4>
-            <h5>${message.NombreDesti}</h5>
-            <h5>${message.DireccionDesti}</h5>
-            <h5>${message.PoblacionCPDesti}</h5>
-            <h5>${message.TelefonoDesti}</h5>
-            <h5>${message.EmailDesti}</h5>            
+      html: `<p>Saludos, info@windymarket.es</p>
+            <p>${message.nombreRemi} necesita las pegatinas para el envio de un producto a ${message.nombreDesti}</p>
+            <h3> SusDatos:</h3><br>
+            <h4> Remitente: </h4>
+            <h5> Nombre y apellidos: ${message.nombreRemi}</h5>
+            <h5> Dirección completa: ${message.direccionRemi}</h5>
+            <h5> Población y CP: ${message.poblacion_CPRemi}</h5>
+            <h5> Tél. móvil: ${message.telefonoRemi}</h5>
+            <h5> e-mail: ${message.emailRemi}</h5><br>
+            <h4> Destinatario: </h4>
+            <h5>Nombre y apellidos: ${message.nombreDesti}</h5>
+            <h5> Dirección completa: ${message.direccionDesti}</h5>
+            <h5> Población y CP: ${message.poblacion_CPDesti}</h5>
+            <h5> Tél. móvil: ${message.telefonoDesti}</h5>
+            <h5> e-mail: ${message.emailDesti}</h5><br>            
+            <h4> Datos Paquete: </h4>
+            <h5> Alto: ${message.alto}</h5>
+            <h5> Ancho: ${message.ancho}</h5>
+            <h5> Largo: ${message.largo}</h5>
+            <h5> PesoKgs: ${message.pesoKgs}</h5>
+            <h5> PesoVolumetrico: ${message.pesoVolumetrico}</h5>            
             `
          };
 
