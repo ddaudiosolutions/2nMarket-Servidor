@@ -10,19 +10,19 @@ exports.crearProducto = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).send({ errors: errors.array() });
   }
-
+  
+  // Crear un nuevo producto con las imágenes proporcionadas en req.files
+  const images = [];
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-
+    
     //PARA SUBIR VARIAS IMAGENES
-    // Crear un nuevo producto con las imágenes proporcionadas en req.files
-    const images = [];
+    
 
     // Procesar cada archivo de imagen
     for (let file of req.files) {
       const extension = file.originalname.split(".").pop().toLowerCase();
-
       if (extension === "heic") {
         console.log("entrando en HEIC", extension);
         try {
@@ -62,20 +62,26 @@ exports.crearProducto = async (req, res, next) => {
         }
       }
     }
-
     producto.images = images;
     console.log(producto.images);
-
     //GUARDAR EL CREADOR VIA JWT
     producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO
-
-    //GUARDAMOS EL PROYECTO
+    //GUARDAMOS EL PRODUCTO
     await producto.save();
     console.log(producto);
-
     res.json(producto);
   } catch (error) {
-    console.log(error);
+    // En caso de error al guardar el producto, eliminar las imágenes subidas a Cloudinary
+    if (images.length > 0) {
+      for (let image of images) {
+        try {
+          await cloudinary.uploader.destroy(image.filename);
+        } catch (deleteError) {
+          console.error(`Error al eliminar la imagen ${image.filename} de Cloudinary:`, deleteError);
+        }
+      }
+    }
+    console.error(error);
     res.status(500).send({ error: "Hubo un Error" });
   }
 };
@@ -131,7 +137,7 @@ exports.obtenerProductosUser = async (req, res) => {
         creado: -1,
       })
       .populate({ path: "author", select: "nombre direccion telefono email" });
-    //console.log(prodUser, totalProductosUs, totalPagesUs);
+    console.log('PRODUCTOSUSR', prodUser, totalProductosUs, totalPagesUs);
     res.json({ prodUser, totalProductosUs, totalPagesUs });
   } catch (error) {
     console.log(error);
@@ -140,6 +146,7 @@ exports.obtenerProductosUser = async (req, res) => {
 };
 
 exports.obtenerProductosAuthor = async (req, res) => {
+  const id = req.params.id;
   try {
     const totalProductosAuth = await Producto.countDocuments({
       author: req.params.id,
@@ -151,12 +158,29 @@ exports.obtenerProductosAuthor = async (req, res) => {
       })
       .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
 
-    console.log(prodAuth, totalProductosAuth);
+    console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
     res.send({ prodAuth, totalProductosAuth });
   } catch (error) {
     console.log(error);
     res.status(500).send("Hubo un Error");
   }
+};
+
+exports.obtenerProductosAuthorDeleteUser = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const totalProductosAuth = await Producto.countDocuments({ author: id });
+      const prodAuth = await Producto.find({ author: id })
+        .sort({ creado: -1 })
+        .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
+
+      console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
+      resolve({ prodAuth, totalProductosAuth }); // Resuelve la promesa con los datos
+    } catch (error) {
+      console.log(error);
+      reject("Hubo un Error"); // Rechaza la promesa con el mensaje de error
+    }
+  });
 };
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
@@ -352,6 +376,49 @@ exports.eliminarProducto = async (req, res) => {
     res.status(500).send("Hubo un Error");
   }
 };
+
+exports.eliminarProductoUserDelete = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Buscar el producto por ID
+      let producto = await Producto.findById(id);
+      console.log(producto);
+
+      // Verificar si el producto existe
+      if (!producto) {
+        return reject({ statusCode: 404, msg: "Producto no encontrado" });
+      }
+
+      // Eliminar el producto
+      await Producto.findByIdAndDelete(id);
+
+      // Si el producto tiene imágenes, eliminarlas en Cloudinary
+      if (producto.images && producto.images.length > 0) {
+        const deletePromises = producto.images.map(image => {
+          return new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(image.filename, function (err, result) {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(result);
+              }
+            });
+          });
+        });
+
+        // Esperar a que todas las promesas de eliminación se completen
+        await Promise.all(deletePromises);
+      }
+
+      // Responder que el producto fue eliminado
+      resolve({ msg: "PRODUCTO ELIMINADO" });
+    } catch (error) {
+      console.log(error);
+      reject({ statusCode: 500, msg: "Hubo un Error" });
+    }
+  });
+};
+
 
 exports.findProductsByWords = async (req, res) => {
   let searchWords = req.body.searchWord; // Replace with your array of words

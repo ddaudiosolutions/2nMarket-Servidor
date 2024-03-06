@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 const fs = require("fs");
+const { obtenerProductosAuthorDeleteUser, eliminarProductoUserDelete} = require("./productController.js")
 
 exports.crearUsuario = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -20,7 +21,8 @@ exports.crearUsuario = async (req, res, next) => {
   try {
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ msg: "El usuario ya existe" });
+      console.log('usuario Existe')
+      return res.status(403).send({ message: "El usuario ya existe" });
     }
 
     user = new User(req.body);
@@ -45,10 +47,10 @@ exports.crearUsuario = async (req, res, next) => {
 
 exports.obtenerUsuario = async (req, res) => {
   try {
-    const userGet = await User.findById(req.params.id);
-    return res.status(200).send(userGet);
+        const userGet = await User.findById(req.params.id);
+        return res.status(200).send(userGet);
   } catch (error) {
-    console.log(error);
+        console.log(error);
     return res.status(500).send("Hubo un Error");
   }
 };
@@ -121,48 +123,44 @@ exports.obtenerUsuarios = async (req, res) => {
 };
 
 exports.eliminarUsuario = async (req, res) => {
-  //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
   }
+
   try {
-    //REVISAR EL ID
-    let usuario = await User.findById(req.params.id);
-
-    if (usuario.imagesAvatar[0].filename) {
-      await cloudinary.uploader.destroy(usuario.imagesAvatar[0].filename, function (err, res) {
-        if (err) {
-          console.log(err);
-          return res.status(400).json({
-            ok: false,
-            menssage: "Error deleting file",
-            errors: err,
-          });
-        }
-        console.log(res);
-      });
-    } else {
-      console.log("no hay foto");
-    }
-    //SI EL USUARIO EXISTE O NO!!!
+    const usuario = await User.findById(req.params.id);
     if (!usuario) {
-      return res.status(404).send({ msg: "Usuario no encontrado" });
+        return res.status(404).send({ msg: "Usuario no encontrado" });
     }
 
-    //ELIMINAR EL USUARIO
-    usuario = await User.findByIdAndDelete(req.params.id);
+    // Aquí asumimos que obtenerProductosAuthorDeleteUser devuelve un objeto con una propiedad 'prodAuth' que es un array de productos
+    const { prodAuth } = await obtenerProductosAuthorDeleteUser(req.params.id);
 
-    res.json({ msg: "USUARIO ELIMINADO" });
-  } catch (error) {
-    console.log(error);
+    // Aquí mapeamos los productos a promesas de eliminación y esperamos a que todas se resuelvan
+    await Promise.all(prodAuth.map(producto => eliminarProductoUserDelete(producto._id)));
+
+    if (usuario.imagesAvatar[0] && usuario.imagesAvatar[0].filename) {
+      await new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(usuario.imagesAvatar[0].filename, function (err, result) {
+          if (err) reject(err);
+          console.log(result);
+          resolve();
+        });
+      });
+    }
+
+    await User.findByIdAndDelete(req.params.id);    
+    res.status(200).send({ msg: "USUARIO ELIMINADO" });
+  } catch (err) {
     res.status(500).send("Hubo un Error");
   }
 };
 
+
 exports.correoEntreUsuarios = async (req, res) => {
   const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
-  console.log('correoEntreUsuarios', req.body);
+ 
   try {
     // Configuración del correo electrónico
     const mailOptions = {
