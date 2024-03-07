@@ -25,10 +25,13 @@ const UserSchema = new Schema({
     trim: true,
   },
   telefono: {
-    type: Number,
+    type: String,
     //required: true,
     trim: true,
     unique: true,
+  },
+  showPhone: {
+    type: Boolean,
   },
   direccion: {
     type: String,

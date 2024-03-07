@@ -10,8 +10,8 @@
 // https://www.mongodb.com/docs/mongodb-vscode/playgrounds/
 
 // Select the database to use.
- /* use('merReactMarketLocal')  */
-  use('mernReactMarket');  
+ use('merReactMarketLocal') 
+  /* use('mernReactMarket');   */
 
 // Insert a few documents into the sales collection.
 /* db.getCollection('windfoilproducts').updateMany({},
@@ -24,20 +24,20 @@
   }); */ 
   db.getCollection('users').updateMany(
     {
-      "direccion": { $exists: false }
+      "telefono": { $exists: false }
     },
     {
-      $set: { "direccion": '' }
+      $set: { "telefono": '' }
     }
   );
   
   // Añade 'poblacion_CP' solo si no existe
   db.getCollection('users').updateMany(
     {
-      "poblacion_CP": { $exists: false }
+      "showPhone": { $exists: false }
     },
     {
-      $set: { "poblacion_CP": '' }
+      $set: { "showPhone": false }
     }
   );
 /* db.getCollection('windfoilproducts').updateMany({},

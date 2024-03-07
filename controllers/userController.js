@@ -60,11 +60,12 @@ exports.editarUsuario = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
+  
   let dataBody = {
     nombre: req.body.nombre,
     email: req.body.email,
     telefono: req.body.telefono,
+    showPhone: req.body.showPhone,
     direccion: req.body.direccion,
     poblacion_CP: req.body.poblacion_CP,
     ...(typeof req.file !== "undefined" && {
