@@ -113,7 +113,7 @@ exports.obtenerProductos = async (req, res) => {
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
       .sort({ creado: -1 })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar  showPhone" });
 
     res.status(200).json({ prodAll, totalProductos, totalPages });
   } catch (error) {
@@ -136,7 +136,7 @@ exports.obtenerProductosUser = async (req, res) => {
       .sort({
         creado: -1,
       })
-      .populate({ path: "author", select: "nombre direccion telefono email" });
+      .populate({ path: "author", select: "nombre direccion telefono email showPhone" });
     console.log('PRODUCTOSUSR', prodUser, totalProductosUs, totalPagesUs);
     res.json({ prodUser, totalProductosUs, totalPagesUs });
   } catch (error) {
@@ -156,7 +156,7 @@ exports.obtenerProductosAuthor = async (req, res) => {
       .sort({
         creado: -1,
       })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
+      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar  showPhone" });
 
     console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
     res.send({ prodAuth, totalProductosAuth });
@@ -172,7 +172,7 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
       const totalProductosAuth = await Producto.countDocuments({ author: id });
       const prodAuth = await Producto.find({ author: id })
         .sort({ creado: -1 })
-        .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar" });
+        .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar showPhone" });
 
       console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
       resolve({ prodAuth, totalProductosAuth }); // Resuelve la promesa con los datos
@@ -188,7 +188,7 @@ exports.obtenerProductoId = async (req, res) => {
   try {
     const productoId = await Producto.findById(req.params.id).populate({
       path: "author",
-      select: "nombre direccion telefono email imagesAvatar",
+      select: "nombre direccion telefono email imagesAvatar showPhone",
     });
     console.log("productoId", productoId);
     res.json(productoId);
@@ -451,7 +451,7 @@ exports.findProductsByWords = async (req, res) => {
       ],
     }).populate({
       path: "author",
-      select: "nombre direccion telefono email imagesAvatar",
+      select: "nombre direccion telefono email imagesAvatar showPhone",
     });
     res.status(200).json({ prodByWords: producto });
   } catch (error) {
