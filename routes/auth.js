@@ -9,6 +9,8 @@ dotenv.config()
 //validar UN USUARIO
 //api/auth
 
+// para realizar el Login. Añadiremos un SuperUsuario
+
 router.post(
   "/",
   [

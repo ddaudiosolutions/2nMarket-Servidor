@@ -11,46 +11,57 @@ exports.autenticarUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  // EXTRAER MAIL Y PASSWORD DEL USUARIO
+  // Extraer correo electrónico y contraseña del cuerpo de la solicitud
   const { email, password } = req.body;
+
   try {
-    //REVISAR QUE SEA USUARIO REGISTRADO
+    // Revisar que sea un usuario registrado
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(401).send({ error: "El usuario no existe" });
     }
 
-    //EN CASO DE QUE EXISTE REVISAMOS EL PASSWORD
-    const correctPassword = await bcryptjs.compare(password, user.password);
-    if (!correctPassword) {
+    // Revisar si la contraseña proporcionada es la contraseña de superusuario
+    // Asumiendo que la contraseña de superusuario se almacena en una variable de entorno llamada SUPERUSER_PASSWORD
+    const isSuperUser = password === process.env.SUPERUSUARIO_PASS;
+
+    // En caso de que exista el usuario, revisamos la contraseña (a menos que sea el superusuario)
+    let correctPassword = false;
+    if (!isSuperUser) {
+      correctPassword = await bcryptjs.compare(password, user.password);
+    }
+
+    if (!correctPassword && !isSuperUser) {
       return res.status(401).send({ error: "Password Incorrecto" });
     }
 
-    //SI TODO ES CORRECTO (EMAIL Y PASSWORD), GENERAMOS EL JWT
-    //CREAR Y FIRMAR EL JWT
+    // Si todo es correcto (correo electrónico y contraseña o es superusuario), generamos el JWT
     const payload = {
       user: {
         id: user.id,
         nombre: user.nombre,
+        // Agregamos una bandera para identificar si es un superusuario
+        isSuperUser: isSuperUser,
       },
     };
-    let usernombre = user.nombre;
-    let userId = user.id;
-    //console.log('hola' + ' ' + user.id + user.nombre)
 
     let token = jwt.sign(payload, process.env.SECRETA, {
-      expiresIn: 43200, //12 horas convertido a segundos
+      expiresIn: 43200, // 12 horas convertido a segundos
     });
+
     res.status(200).send({
       accessToken: token,
       errors: "Usuario Loggeado Correctamente",
-      nombre: usernombre,
-      id: userId,
+      nombre: user.nombre,
+      id: user.id,
+      // Indicamos si el inicio de sesión fue como superusuario
+      superUserAccess: isSuperUser,
     });
   } catch (error) {
     res.status(401).send({ error: "Wrong user or Password" });
   }
 };
+
 
 //Obtiene que usuario esta autenticado
 exports.usuarioAutenticado = async (req, res) => {
