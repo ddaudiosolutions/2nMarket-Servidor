@@ -14,7 +14,7 @@ const { parser } = require("../cloudinary");
 
 //CREAR UN PRODUCTO
 //api/productos
-router.post("/newproduct", auth, parser.array("images", 4), productController.crearProducto);
+router.post("/newproduct", auth, parser.array("images", 8), productController.crearProducto);
 
 //OBTENER PRODUCTOS USER
 router.get("/user", auth, productController.obtenerProductosUser);
@@ -47,7 +47,7 @@ router.get("/user/editar/:id", auth, productController.obtenerProductoEditar);
 router.put(
   "/user/editar/:id",
   auth,
-  parser.array("images", 4),
+  parser.array("images", 8),
   productController.editarProductoUser
 );
 
