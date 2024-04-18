@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 //const mongoose = require("mongoose");
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 
 exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -85,6 +86,57 @@ exports.crearProducto = async (req, res, next) => {
     res.status(500).send({ error: "Hubo un Error" });
   }
 };
+
+exports.productosMasVistos = async (req, res) => {
+  console.log('entrando en productosMasVistos')  
+  const analyticsDataClient = new BetaAnalyticsDataClient();
+    const propertyId = '338632609'; // Asegúrate de reemplazar esto con tu ID de propiedad de Google Analytics
+    try {
+        const [response] = await analyticsDataClient.runReport({
+            property: `properties/${propertyId}`,
+            dateRanges: [
+              {
+                  startDate: '7daysAgo',
+                  endDate: 'yesterday',
+              },
+          ],
+          dimensions: [
+              { name: 'pagePath' },
+          ],
+          metrics: [
+              { name: 'screenPageViews' },
+          ],
+          orderBys: [
+              {
+                  desc: true,
+                  metric: { metricName: 'screenPageViews' },
+              },
+          ],
+          limit: 100,
+      });
+
+      const productosVistas = response.rows.map(row => {
+        const pagePath = row.dimensionValues[0].value;
+        const regex = /^\/productos\/([a-fA-F0-9]{24})$/;
+        const match = pagePath.match(regex);    
+        if (match) {
+            const idProducto = match[1];
+            const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
+            return { idProducto, vistas };
+        }    
+        return undefined;
+    }).filter(producto => producto !== undefined)
+      .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
+      .slice(0, 5) // Tomar solo los primeros 6 productos
+      .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
+ 
+    res.status(200).json({productosVistas}) ;    
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Hubo un Error" });
+    }
+
+}
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
@@ -185,6 +237,7 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
+  console.log('productoIdBody', req.params)
   try {
     const productoId = await Producto.findById(req.params.id).populate({
       path: "author",
@@ -541,3 +594,5 @@ exports.editVendidoState = async (req, res) => {
     res.status(500).send("Error al actualizar el estado reservado");
   }
 };
+
+
