@@ -14,6 +14,7 @@ const { parser } = require("../cloudinary");
 
 //CREAR UN PRODUCTO
 //api/productos
+router.get('/mostviewedProducts', productController.productosMasVistos);
 router.post("/newproduct", auth, parser.array("images", 8), productController.crearProducto);
 
 //OBTENER PRODUCTOS USER
@@ -65,5 +66,6 @@ router.post('/editReservedState', productController.editReservedState);
 
 // HANDLE ESTADO VENDIDO
 router.post('/editVendidoState', productController.editVendidoState); 
+
 
 module.exports = router;
