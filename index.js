@@ -2,6 +2,8 @@ const express = require("express");
 
 const conectarDB = require("./config/db");
 const cors = require("cors");
+const prerender = require("prerender-node");
+
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
@@ -15,6 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 //2 PUERTO DE LA APP
 const port = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
 
+// Configuración de Prerender.io
+app.use(prerender.set('prerenderToken', process.env.PRERENDER));
 //IMPORTAR RUTAS
 app.use("/api/usuarios", require("./routes/usersRoutes")); //PARA CREAR USUARIOS
 app.use("/api/auth", require("./routes/auth")); //PARA AUTENTICAR USUARIOS
