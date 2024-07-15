@@ -6,9 +6,18 @@ const cors = require("cors");
 
 //1 CREAMOS EL SERVIDOR
 const app = express();
+const corsOptions = {
+  origin: 'https://your-nextjs-app-url', // Reemplaza con la URL de tu app Next.js desplegada
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-app.options("*", cors());
-app.use(cors());
+// Aplicar CORS a todas las rutas
+app.use(cors(corsOptions));
+
+// Habilitar preflight para todas las rutas
+app.options('*', cors(corsOptions));
 // HABILITAR EXPRESS.JSON
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
