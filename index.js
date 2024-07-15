@@ -7,7 +7,7 @@ const cors = require("cors");
 //1 CREAMOS EL SERVIDOR
 const app = express();
 const corsOptions = {
-  origin: 'https://your-nextjs-app-url', // Reemplaza con la URL de tu app Next.js desplegada
+  origin: 'https://windymarketnextjs-production.up.railway.app', // Reemplaza con la URL de tu app Next.js desplegada
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204
