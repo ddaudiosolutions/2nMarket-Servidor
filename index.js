@@ -6,8 +6,18 @@ const cors = require("cors");
 
 //1 CREAMOS EL SERVIDOR
 const app = express();
+const allowedOrigins = [
+  'https://windymarketnextjs-production.up.railway.app',
+  'https://www.windymarket.es',
+];
 const corsOptions = {
-  origin: 'https://windymarketnextjs-production.up.railway.app', // Reemplaza con la URL de tu app Next.js desplegada
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204
