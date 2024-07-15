@@ -6,28 +6,10 @@ const cors = require("cors");
 
 //1 CREAMOS EL SERVIDOR
 const app = express();
-const allowedOrigins = [
-  'https://windymarketnextjs-production.up.railway.app',
-  'https://www.windymarket.es',
-];
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
 
-// Aplicar CORS a todas las rutas
-app.use(cors(corsOptions));
+app.options("*", cors());
+app.use(cors());
 
-// Habilitar preflight para todas las rutas
-app.options('*', cors(corsOptions));
 // HABILITAR EXPRESS.JSON
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
