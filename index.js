@@ -7,8 +7,20 @@ const cors = require("cors");
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
-app.options("*", cors());
-app.use(cors());
+const whitelist = ['https://windymarketnextfront.vercel.app', 'https://www.windymarket.es'];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  optionsSuccessStatus: 200 // Para algunos navegadores que soportan correctamente el status 204
+};
+
+app.use(cors(corsOptions));
 
 // HABILITAR EXPRESS.JSON
 app.use(express.json({ extended: true }));
