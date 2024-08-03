@@ -7,7 +7,7 @@ const cors = require("cors");
 //1 CREAMOS EL SERVIDOR
 const app = express();
 
-const whitelist = ['https://windymarketnextfront.vercel.app', 'https://www.windymarket.es'];
+const whitelist = ['https://windymarketnextfront.vercel.app', 'https://www.windymarket.es', 'http://localhost:3000', 'http://localhost:3001'];
 
 const corsOptions = {
   origin: function (origin, callback) {
