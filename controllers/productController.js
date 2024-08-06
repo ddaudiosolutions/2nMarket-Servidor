@@ -245,7 +245,7 @@ exports.obtenerProductoId = async (req, res) => {
     });
 
     // Si el producto tiene una imagen, obtén sus detalles desde Cloudinary
-    if (productoId && productoId.images && productoId.images.length > 0) {
+    /* if (productoId && productoId.images && productoId.images.length > 0) {
       const imageUrls = productoId.images;
       const imageDetailsPromises = imageUrls.map(async (imageUrl) => {
         return await getImageDetails(imageUrl);
@@ -255,7 +255,7 @@ exports.obtenerProductoId = async (req, res) => {
 
       // Añadir los detalles de la imagen al producto
       productoId.images = imagesDetails;
-    }
+    } */
     res.json(productoId);
   } catch (error) {
     console.log(error);
