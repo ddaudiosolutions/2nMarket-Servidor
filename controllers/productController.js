@@ -4,6 +4,7 @@ const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 //const mongoose = require("mongoose");
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+const getImageDetails = require("../cloudinary/utils.js");
 
 exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -11,15 +12,15 @@ exports.crearProducto = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).send({ errors: errors.array() });
   }
-  
+
   // Crear un nuevo producto con las imágenes proporcionadas en req.files
   const images = [];
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-    
+
     //PARA SUBIR VARIAS IMAGENES
-    
+
 
     // Procesar cada archivo de imagen
     for (let file of req.files) {
@@ -88,53 +89,52 @@ exports.crearProducto = async (req, res, next) => {
 };
 
 exports.productosMasVistos = async (req, res) => {
-  console.log('entrando en productosMasVistos')  
   const analyticsDataClient = new BetaAnalyticsDataClient();
-    const propertyId = '338632609'; // Asegúrate de reemplazar esto con tu ID de propiedad de Google Analytics
-    try {
-        const [response] = await analyticsDataClient.runReport({
-            property: `properties/${propertyId}`,
-            dateRanges: [
-              {
-                  startDate: '7daysAgo',
-                  endDate: 'yesterday',
-              },
-          ],
-          dimensions: [
-              { name: 'pagePath' },
-          ],
-          metrics: [
-              { name: 'screenPageViews' },
-          ],
-          orderBys: [
-              {
-                  desc: true,
-                  metric: { metricName: 'screenPageViews' },
-              },
-          ],
-          limit: 100,
-      });
+  const propertyId = '338632609'; // Asegúrate de reemplazar esto con tu ID de propiedad de Google Analytics
+  try {
+    const [response] = await analyticsDataClient.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [
+        {
+          startDate: '7daysAgo',
+          endDate: 'yesterday',
+        },
+      ],
+      dimensions: [
+        { name: 'pagePath' },
+      ],
+      metrics: [
+        { name: 'screenPageViews' },
+      ],
+      orderBys: [
+        {
+          desc: true,
+          metric: { metricName: 'screenPageViews' },
+        },
+      ],
+      limit: 100,
+    });
 
-      const productosVistas = response.rows.map(row => {
-        const pagePath = row.dimensionValues[0].value;
-        const regex = /^\/productos\/([a-fA-F0-9]{24})$/;
-        const match = pagePath.match(regex);    
-        if (match) {
-            const idProducto = match[1];
-            const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
-            return { idProducto, vistas };
-        }    
-        return undefined;
+    const productosVistas = response.rows.map(row => {
+      const pagePath = row.dimensionValues[0].value;
+      const regex = /^\/productos\/([a-fA-F0-9]{24})$/;
+      const match = pagePath.match(regex);
+      if (match) {
+        const idProducto = match[1];
+        const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
+        return { idProducto, vistas };
+      }
+      return undefined;
     }).filter(producto => producto !== undefined)
       .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
       .slice(0, 5) // Tomar solo los primeros 6 productos
       .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
- 
-    res.status(200).json({productosVistas}) ;    
-    } catch (err) {
-      console.error(err);
-      res.status(500).send({ error: "Hubo un Error" });
-    }
+
+    res.status(200).json({ productosVistas });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Hubo un Error" });
+  }
 
 }
 
@@ -243,7 +243,19 @@ exports.obtenerProductoId = async (req, res) => {
       path: "author",
       select: "nombre direccion telefono email imagesAvatar showPhone",
     });
-    console.log("productoId", productoId);
+
+    // Si el producto tiene una imagen, obtén sus detalles desde Cloudinary
+    if (productoId && productoId.images && productoId.images.length > 0) {
+      const imageUrls = productoId.images;
+      const imageDetailsPromises = imageUrls.map(async (imageUrl) => {
+        return await getImageDetails(imageUrl);
+      });
+
+      const imagesDetails = await Promise.all(imageDetailsPromises);
+
+      // Añadir los detalles de la imagen al producto
+      productoId.images = imagesDetails;
+    }
     res.json(productoId);
   } catch (error) {
     console.log(error);
@@ -273,24 +285,24 @@ exports.editarProductoUser = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
   console.log('editarProductoUser', req.body);
-  const { 
-    imagesDelete, 
-    title, 
-    categoria, 
-    subCategoria, 
-    price, 
-    description, 
-    contacto, 
-    delivery, 
-    balearicDelivery, 
-    ancho, 
-    largo, 
-    alto, 
-    pesoVolumetrico, 
-    pesoKgs, 
-    precioEstimado, 
-    reservado, 
-    vendido 
+  const {
+    imagesDelete,
+    title,
+    categoria,
+    subCategoria,
+    price,
+    description,
+    contacto,
+    delivery,
+    balearicDelivery,
+    ancho,
+    largo,
+    alto,
+    pesoVolumetrico,
+    pesoKgs,
+    precioEstimado,
+    reservado,
+    vendido
   } = req.body;
 
   try {
@@ -544,7 +556,7 @@ exports.envioPegatinas = async (req, res) => {
             <h5> PesoKgs: ${message.pesoKgs}</h5>
             <h5> PesoVolumetrico: ${message.pesoVolumetrico}</h5>            
             `
-         };
+    };
 
     // Enviar el correo electrónico
     await transporter.sendMail(mailOptions);
