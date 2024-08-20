@@ -532,7 +532,7 @@ exports.envioPegatinas = async (req, res) => {
     // Configuración del correo electrónico
     const mailOptions = {
       from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
-      to: 'info@windymarket.es', // Cambia esto para enviar al vendedor
+      to: 'infowindymarket@gmail.com', // Cambia esto para enviar al vendedor
       subject: `Petición de pegatinas para envio`,
       html: `<p>Saludos, info@windymarket.es</p>
             <p>${message.nombreRemi} necesita las pegatinas para el envio de un producto a ${message.nombreDesti}</p>
