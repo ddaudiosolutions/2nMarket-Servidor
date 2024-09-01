@@ -130,7 +130,7 @@ exports.productosMasVistos = async (req, res) => {
       return undefined;
     }).filter(producto => producto !== undefined)
       .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
-      .slice(0, 6) // Tomar solo los primeros 6 productos
+      .slice(0, 5) // Tomar solo los primeros 6 productos
       .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
     console.log('Productos más vistos:', productosVistas);
     res.status(200).json({ productosVistas });
