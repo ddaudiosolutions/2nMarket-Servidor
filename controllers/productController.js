@@ -89,6 +89,7 @@ exports.crearProducto = async (req, res, next) => {
 };
 
 exports.productosMasVistos = async (req, res) => {
+  console.log('productosMasVistos')
   const analyticsDataClient = new BetaAnalyticsDataClient();
   const propertyId = '338632609'; // Asegúrate de reemplazar esto con tu ID de propiedad de Google Analytics
   try {
@@ -117,19 +118,21 @@ exports.productosMasVistos = async (req, res) => {
 
     const productosVistas = response.rows.map(row => {
       const pagePath = row.dimensionValues[0].value;
-      const regex = /^\/productos\/([a-fA-F0-9]{24})$/;
+      const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
+
+      const regex = /^\/productos\/([a-fA-F0-9]{24})\/?$/;
       const match = pagePath.match(regex);
+
       if (match) {
         const idProducto = match[1];
-        const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
         return { idProducto, vistas };
       }
       return undefined;
     }).filter(producto => producto !== undefined)
       .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
-      .slice(0, 5) // Tomar solo los primeros 6 productos
+      .slice(0, 6) // Tomar solo los primeros 6 productos
       .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
-
+    console.log('Productos más vistos:', productosVistas);
     res.status(200).json({ productosVistas });
   } catch (err) {
     console.error(err);
