@@ -14,6 +14,7 @@ const { parser } = require("../cloudinary");
 
 //CREAR UN PRODUCTO
 //api/productos
+router.post('/getViewsProduct', productController.numeroVistasProducto)
 router.get('/mostviewedProducts', productController.productosMasVistos);
 router.post("/newproduct", auth, parser.array("images", 8), productController.crearProducto);
 
@@ -62,10 +63,10 @@ router.post("/searchByWords", productController.findProductsByWords);
 router.post('/envioPegatinas', productController.envioPegatinas);
 
 // HANDLE ESTADO RESERVADO
-router.post('/editReservedState', productController.editReservedState); 
+router.post('/editReservedState', productController.editReservedState);
 
 // HANDLE ESTADO VENDIDO
-router.post('/editVendidoState', productController.editVendidoState); 
+router.post('/editVendidoState', productController.editVendidoState);
 
 
 module.exports = router;

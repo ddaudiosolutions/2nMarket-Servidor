@@ -88,6 +88,71 @@ exports.crearProducto = async (req, res, next) => {
   }
 };
 
+// Obtener las vistas de un producto específico cuando se visita su página
+exports.numeroVistasProducto = async (req, res) => {
+  console.log('mueriVistasProducto', req.body)
+  const { productoId } = req.body; // ID del producto desde los parámetros de la URL
+  const analyticsDataClient = new BetaAnalyticsDataClient();
+  const propertyId = '338632609'; // ID de propiedad de Google Analytics
+
+  try {
+    const [response] = await analyticsDataClient.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [
+        {
+          startDate: '2024-07-01', // Ajusta según lo necesario
+          endDate: 'today',        // Hasta el día de hoy
+        },
+      ],
+      dimensions: [
+        { name: 'eventName' },       // Nombre del evento
+        { name: 'pagePath' },        // Ruta de la página, donde está el ID del producto
+      ],
+      metrics: [
+        { name: 'eventCount' },      // Número de veces que se disparó el evento
+      ],
+      dimensionFilter: {
+        andGroup: {
+          expressions: [
+            {
+              filter: {
+                fieldName: 'eventName',
+                stringFilter: {
+                  matchType: 'EXACT',
+                  value: 'Ver_Producto_nextjs', // Filtrar solo por el evento de visualización de producto
+                },
+              },
+            },
+            {
+              filter: {
+                fieldName: 'pagePath', // La ruta donde aparece el productId
+                stringFilter: {
+                  matchType: 'CONTAINS',
+                  value: `/productos/${productoId}`, // Filtrar por el productId en la URL
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // Procesar los resultados para obtener los eventos específicos
+    if (response.rows.length > 0) {
+      const evento = response.rows[0];
+      const vistas = parseInt(evento.metricValues[0].value, 10); // Convertir las vistas a número
+      console.log('Número de eventos Ver_Producto_nextjs:', vistas);
+      res.status(200).json({ eventos: vistas });
+    } else {
+      res.status(404).json({ message: 'No se encontraron eventos para este producto' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: 'Hubo un error al obtener los datos del producto' });
+  }
+};
+
+
 exports.productosMasVistos = async (req, res) => {
   console.log('productosMasVistos')
   const analyticsDataClient = new BetaAnalyticsDataClient();
@@ -97,7 +162,7 @@ exports.productosMasVistos = async (req, res) => {
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: '7daysAgo',
+          startDate: '28daysAgo',
           endDate: 'yesterday',
         },
       ],
@@ -113,7 +178,7 @@ exports.productosMasVistos = async (req, res) => {
           metric: { metricName: 'screenPageViews' },
         },
       ],
-      limit: 100,
+      limit: 10,
     });
 
     const productosVistas = response.rows.map(row => {
@@ -130,13 +195,13 @@ exports.productosMasVistos = async (req, res) => {
       return undefined;
     }).filter(producto => producto !== undefined)
       .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
-      .slice(0, 5) // Tomar solo los primeros 6 productos
+      .slice(0, 6) // Tomar solo los primeros 6 productos
       .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
     console.log('Productos más vistos:', productosVistas);
     res.status(200).json({ productosVistas });
   } catch (err) {
     console.error(err);
-    res.status(500).send({ error: "Hubo un Error" });
+    res.status(500).json({ error: err.message || "Hubo un Error" });
   }
 
 }
@@ -240,11 +305,11 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
-  console.log('productoIdBody', req.params)
+
   try {
     const productoId = await Producto.findById(req.params.id).populate({
       path: "author",
-      select: "nombre direccion telefono email imagesAvatar showPhone",
+      select: "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
     });
 
     // Si el producto tiene una imagen, obtén sus detalles desde Cloudinary
@@ -541,15 +606,17 @@ exports.envioPegatinas = async (req, res) => {
             <p>${message.nombreRemi} necesita las pegatinas para el envio de un producto a ${message.nombreDesti}</p>
             <h3> SusDatos:</h3><br>
             <h4> Remitente: </h4>
-            <h5> Nombre y apellidos: ${message.nombreRemi}</h5>
+            <h5> Nombre y apellidos: ${message.nombreRemi} ${message.apellidosRemi}</h5>
+            <h5> DNI: ${message.dniRemi}</h5>
             <h5> Dirección completa: ${message.direccionRemi}</h5>
-            <h5> Población y CP: ${message.poblacion_CPRemi}</h5>
+            <h5> Población y CP: ${message.poblacionRemi} ${message.codigoPostalRemi}</h5>
             <h5> Tél. móvil: ${message.telefonoRemi}</h5>
             <h5> e-mail: ${message.emailRemi}</h5><br>
             <h4> Destinatario: </h4>
-            <h5>Nombre y apellidos: ${message.nombreDesti}</h5>
+            <h5>Nombre y apellidos: ${message.nombreDesti} ${message.apellidosDesti}</h5>
+            <h5> DNI: ${message.dniDesti}</h5>
             <h5> Dirección completa: ${message.direccionDesti}</h5>
-            <h5> Población y CP: ${message.poblacion_CPDesti}</h5>
+            <h5> Población y CP: ${message.poblacionDesti} ${message.codigoPostalDesti}</h5>
             <h5> Tél. móvil: ${message.telefonoDesti}</h5>
             <h5> e-mail: ${message.emailDesti}</h5><br>            
             <h4> Datos Paquete: </h4>

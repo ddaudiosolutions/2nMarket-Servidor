@@ -10,7 +10,18 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     trim: true,
-    unique: true,
+  },
+  apellidos: {
+    type: String,
+    /*  required: true, */
+    trim: true,
+    /*  unique: true, */
+  },
+  dni: {
+    type: String,
+    /*  required: true, */
+    trim: true,
+    /*  unique: true, */
   },
   email: {
     type: String,
@@ -38,6 +49,10 @@ const UserSchema = new Schema({
     // required: true,
   },
   poblacion_CP: {
+    type: String,
+    // required: true,
+  },
+  codigoPostal: {
     type: String,
     // required: true,
   },

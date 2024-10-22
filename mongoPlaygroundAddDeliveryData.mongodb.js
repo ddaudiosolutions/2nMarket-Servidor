@@ -1,3 +1,6 @@
+// Importar bcrypt para encriptar la contraseña
+const bcrypt = require('bcrypt');
+
 /* global use, db */
 // MongoDB Playground
 // To disable this template go to Settings | MongoDB | Use Default Template For Playground.
@@ -10,36 +13,53 @@
 // https://www.mongodb.com/docs/mongodb-vscode/playgrounds/
 
 // Select the database to use.
- use('merReactMarketLocal') 
-  /* use('mernReactMarket');   */
+/* use('mernReactMarket_Local') */
+use('mernReactMarket');
+
+
+// Definir la nueva contraseña
+/* const newPassword = "martina0319"; */
+
+// Encriptar la contraseña con bcrypt
+/* const hashedPassword = bcrypt.hashSync(newPassword, 10); */
+
+// Actualizar el usuario en la base de datos
+/* db.getCollection("users").updateOne(
+  { email: "ddaudiosolutions@gmail.com" }, // Filtro para encontrar el usuario
+  { $set: { password: hashedPassword } }   // Actualización de la contraseña
+); */
 
 // Insert a few documents into the sales collection.
+/* db.getCollection('users').dropIndex({ nombre: 1 }); */
+// Añade 'lo que pongas' solo si no existe
+/* db.getCollection('users').createIndex(
+  { nombre: 1, apellidos: 1 },
+  { unique: true }
+); */
+db.getCollection('users').updateMany(
+  {},
+  {
+    $set: { 'dni': '00000000z', 'apellidos': '', 'codigoPostal': '00000' }
+  }
+);
 /* db.getCollection('windfoilproducts').updateMany({},
   {
     $set: {alto: 0, ancho: 0, largo: 0, pesoVolumetrico: 0, precioEstimado: 0, delivery: false}
   }); */
- /* db.getCollection('users').updateMany({},
-  {
-    $unset: {direccion: '', poblacion_CP: ''}
-  }); */ 
-  db.getCollection('users').updateMany(
-    {
-      "telefono": { $exists: false }
-    },
-    {
-      $set: { "telefono": '' }
-    }
-  );
-  
-  // Añade 'poblacion_CP' solo si no existe
-  db.getCollection('users').updateMany(
-    {
-      "showPhone": { $exists: false }
-    },
-    {
-      $set: { "showPhone": false }
-    }
-  );
+/* db.getCollection('users').updateMany({},
+ {
+   $unset: {direccion: '', poblacion_CP: ''}
+ }); */
+/*  db.getCollection('users').updateMany(
+   {
+     "telefono": { $exists: false }
+   },
+   {
+     $set: { "telefono": '' }
+   }
+ ); */
+
+
 /* db.getCollection('windfoilproducts').updateMany({},
   {
     $set: {pesoKgs: 0}

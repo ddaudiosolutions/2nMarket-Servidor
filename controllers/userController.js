@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 const fs = require("fs");
-const { obtenerProductosAuthorDeleteUser, eliminarProductoUserDelete} = require("./productController.js")
+const { obtenerProductosAuthorDeleteUser, eliminarProductoUserDelete } = require("./productController.js")
 
 exports.crearUsuario = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
@@ -15,7 +15,7 @@ exports.crearUsuario = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-console.log('req', req.body)
+  console.log('req', req.body)
   const { email, password, nombre } = req.body; //destructuramos para llamar a los datos
 
   try {
@@ -47,10 +47,10 @@ console.log('req', req.body)
 
 exports.obtenerUsuario = async (req, res) => {
   try {
-        const userGet = await User.findById(req.params.id);
-        return res.status(200).send(userGet);
+    const userGet = await User.findById(req.params.id);
+    return res.status(200).send(userGet);
   } catch (error) {
-        console.log(error);
+    console.log(error);
     return res.status(500).send("Hubo un Error");
   }
 };
@@ -60,9 +60,12 @@ exports.editarUsuario = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  
+
   let dataBody = {
     nombre: req.body.nombre,
+    apellidos: req.body.apellidos,
+    dni: req.body.dni,
+    codigoPostal: req.body.codigoPostal,
     email: req.body.email,
     telefono: req.body.telefono,
     showPhone: req.body.showPhone,
@@ -127,13 +130,13 @@ exports.obtenerUsuarios = async (req, res) => {
 exports.eliminarUsuario = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ errors: errors.array() });
   }
 
   try {
     const usuario = await User.findById(req.params.id);
     if (!usuario) {
-        return res.status(404).send({ msg: "Usuario no encontrado" });
+      return res.status(404).send({ msg: "Usuario no encontrado" });
     }
 
     // Aquí asumimos que obtenerProductosAuthorDeleteUser devuelve un objeto con una propiedad 'prodAuth' que es un array de productos
@@ -152,7 +155,7 @@ exports.eliminarUsuario = async (req, res) => {
       });
     }
 
-    await User.findByIdAndDelete(req.params.id);    
+    await User.findByIdAndDelete(req.params.id);
     res.status(200).send({ msg: "USUARIO ELIMINADO" });
   } catch (err) {
     res.status(500).send("Hubo un Error");
@@ -162,7 +165,7 @@ exports.eliminarUsuario = async (req, res) => {
 
 exports.correoEntreUsuarios = async (req, res) => {
   const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
- 
+
   try {
     // Configuración del correo electrónico
     const mailOptions = {
