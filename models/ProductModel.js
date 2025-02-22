@@ -6,6 +6,16 @@ const windfoilproductSchema = new Schema({
   title: {
     type: String,
   },
+  slug: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  url: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   images: [{
     url: String,
     filename: String
@@ -43,7 +53,7 @@ const windfoilproductSchema = new Schema({
   },
   balearicDelivery: {
     type: Boolean,
-  },  
+  },
   categoria: {
     type: String,
   },
@@ -67,7 +77,7 @@ const windfoilproductSchema = new Schema({
   reservado: {
     type: Boolean,
   },
-  vendido:{
+  vendido: {
     type: Boolean,
   }
 

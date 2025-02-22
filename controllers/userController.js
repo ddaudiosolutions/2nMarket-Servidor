@@ -199,9 +199,10 @@ exports.mailingUsuarios = async (req, res) => {
 
       // Convertir el array en una cadena JSON
       const jsonEmails = JSON.stringify(emails);
-
+      const emailsSinCommillas = emails.join(",")
       // Escribir los datos en un archivo .json
       fs.writeFileSync("./storage/emailsDeUsuarios.json", jsonEmails);
+      fs.writeFileSync("./storage/emailSinComillas.json", emailsSinCommillas);
       res.status(200).send({ msg: `Emails exportados exitosamente ${emails.length}` });
     })
     .catch((error) => {

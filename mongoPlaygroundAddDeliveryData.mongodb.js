@@ -36,12 +36,12 @@ use('mernReactMarket');
   { nombre: 1, apellidos: 1 },
   { unique: true }
 ); */
-db.getCollection('users').updateMany(
+/* db.getCollection('users').updateMany(
   {},
   {
     $set: { 'dni': '00000000z', 'apellidos': '', 'codigoPostal': '00000' }
   }
-);
+); */
 /* db.getCollection('windfoilproducts').updateMany({},
   {
     $set: {alto: 0, ancho: 0, largo: 0, pesoVolumetrico: 0, precioEstimado: 0, delivery: false}
@@ -64,5 +64,12 @@ db.getCollection('users').updateMany(
   {
     $set: {pesoKgs: 0}
   }); */
+db.getCollection('windfoilproducts').updateMany({},
+  {
+    $set: { slug: '', url: '' }
+  });
+
+/* db.getCollection('windfoilproducts').find({}, { title: 1, slug: 1, url: 1 }).limit(10); */
+
 
 

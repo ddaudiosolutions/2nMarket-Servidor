@@ -7,12 +7,11 @@
 use('mernReactMarket');
 
 // Search for documents in the current collection.
-db.getCollection('windfoilproducts')
-  .find(
-    {
-       _id: ObjectId("65f1c77606b5d24fc0e44ee9") 
-       /* author: ObjectId("61dcb4124d6bed0016476cd9") */
-      /* email: "jjobarcelo@gmail.com" */
-    },    
-  )
-  
+
+
+/*  use("tu_base_de_datos"); */
+
+db.windfoilproducts.aggregate([
+  { $match: {} },  // Selecciona todos los documentos
+  { $out: "windfoilproducts_backup" } // Crea una copia con este nombre
+]);
