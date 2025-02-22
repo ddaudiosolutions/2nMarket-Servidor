@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 //const mongoose = require("mongoose");
+const slugify = require("slugify");
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const getImageDetails = require("../cloudinary/utils.js");
 
@@ -18,7 +19,7 @@ exports.crearProducto = async (req, res, next) => {
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-
+    console.log('crearProducto', producto);
     //PARA SUBIR VARIAS IMAGENES
 
 
@@ -68,6 +69,12 @@ exports.crearProducto = async (req, res, next) => {
     console.log(producto.images);
     //GUARDAR EL CREADOR VIA JWT
     producto.author = req.user.id; //REACTIVAR AL TENER EL STATE DEL USUARIO
+    // Generamos el slug solo si el título existe
+    if (producto.title) {
+      producto.slug = slugify(producto.title, { lower: true, strict: true });
+    }
+    // Creamos la URL amigable
+    producto.url = `${producto.slug}-${producto._id}`;
     //GUARDAMOS EL PRODUCTO
     await producto.save();
     console.log(producto);
@@ -312,18 +319,6 @@ exports.obtenerProductoId = async (req, res) => {
       select: "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
     });
 
-    // Si el producto tiene una imagen, obtén sus detalles desde Cloudinary
-    /* if (productoId && productoId.images && productoId.images.length > 0) {
-      const imageUrls = productoId.images;
-      const imageDetailsPromises = imageUrls.map(async (imageUrl) => {
-        return await getImageDetails(imageUrl);
-      });
-
-      const imagesDetails = await Promise.all(imageDetailsPromises);
-
-      // Añadir los detalles de la imagen al producto
-      productoId.images = imagesDetails;
-    } */
     res.json(productoId);
   } catch (error) {
     console.log(error);
