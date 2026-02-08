@@ -190,21 +190,12 @@ exports.productosMasVistos = async (req, res) => {
           endDate: "today",
         },
       ],
-      dimensions: [{ name: "product_id" }],
-      metrics: [{ name: "eventCount" }],
-      dimensionFilter: {
-        filter: {
-          fieldName: "eventName",
-          stringFilter: {
-            matchType: "EXACT",
-            value: "Ver_Producto_nextjs",
-          },
-        },
-      },
+      dimensions: [{ name: "pagePath" }],
+      metrics: [{ name: "screenPageViews" }],
       orderBys: [
         {
           desc: true,
-          metric: { metricName: "eventCount" },
+          metric: { metricName: "screenPageViews" },
         },
       ],
       limit: 10,
@@ -212,20 +203,22 @@ exports.productosMasVistos = async (req, res) => {
 
     const productosVistas = response.rows
       .map((row) => {
-        const productId = row.dimensionValues[0].value;
+        const pagePath = row.dimensionValues[0].value;
         const vistas = parseInt(row.metricValues[0].value, 10);
 
-        // Validar que el productId sea un ObjectId válido de MongoDB (24 caracteres hexadecimales)
-        const regex = /^[a-fA-F0-9]{24}$/;
-        if (regex.test(productId)) {
-          return { idProducto: productId, vistas };
+        const regex = /^\/productos\/([a-fA-F0-9]{24})\/?$/;
+        const match = pagePath.match(regex);
+
+        if (match) {
+          const idProducto = match[1];
+          return { idProducto, vistas };
         }
         return undefined;
       })
       .filter((producto) => producto !== undefined)
-      .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
-      .slice(0, 6) // Tomar solo los primeros 6 productos
-      .map((producto) => producto.idProducto); // Extraer solo los IDs
+      .sort((a, b) => b.vistas - a.vistas)
+      .slice(0, 6)
+      .map((producto) => producto.idProducto);
     console.log("Productos más vistos:", productosVistas);
     res.status(200).json({ productosVistas });
   } catch (err) {
