@@ -121,7 +121,7 @@ exports.numeroVistasProducto = async (req, res) => {
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: "28daysAgo",
+          startDate: "2024-06-01",
           endDate: "yesterday",
         },
       ],
@@ -157,7 +157,10 @@ exports.numeroVistasProducto = async (req, res) => {
       },
     });
 
-    console.log(`Response rows for product ${productoId}:`, response.rows?.length || 0);
+    console.log(
+      `Response rows for product ${productoId}:`,
+      response.rows?.length || 0,
+    );
     console.log("Rows data:", JSON.stringify(response.rows, null, 2));
 
     // Procesar los resultados para obtener los eventos específicos
@@ -168,9 +171,7 @@ exports.numeroVistasProducto = async (req, res) => {
       res.status(200).json({ eventos: vistas });
     } else {
       console.log("No se encontraron eventos para el producto:", productoId);
-      res
-        .status(200)
-        .json({ eventos: 0 });
+      res.status(200).json({ eventos: 0 });
     }
   } catch (err) {
     console.error(err);
@@ -214,7 +215,10 @@ exports.productosMasVistos = async (req, res) => {
     });
 
     console.log("Response rows:", response.rows?.length || 0);
-    console.log("First 3 rows:", JSON.stringify(response.rows?.slice(0, 3), null, 2));
+    console.log(
+      "First 3 rows:",
+      JSON.stringify(response.rows?.slice(0, 3), null, 2),
+    );
 
     const productosVistas = response.rows
       .map((row) => {
