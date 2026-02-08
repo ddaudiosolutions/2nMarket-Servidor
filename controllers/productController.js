@@ -191,11 +191,20 @@ exports.productosMasVistos = async (req, res) => {
         },
       ],
       dimensions: [{ name: "pagePath" }],
-      metrics: [{ name: "screenPageViews" }],
+      metrics: [{ name: "eventCount" }],
+      dimensionFilter: {
+        filter: {
+          fieldName: "eventName",
+          stringFilter: {
+            matchType: "EXACT",
+            value: "Ver_Producto_nextjs",
+          },
+        },
+      },
       orderBys: [
         {
           desc: true,
-          metric: { metricName: "screenPageViews" },
+          metric: { metricName: "eventCount" },
         },
       ],
       limit: 10,
