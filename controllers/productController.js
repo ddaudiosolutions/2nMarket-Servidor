@@ -210,6 +210,9 @@ exports.productosMasVistos = async (req, res) => {
       limit: 10,
     });
 
+    console.log("Response rows:", response.rows?.length || 0);
+    console.log("First 3 rows:", JSON.stringify(response.rows?.slice(0, 3), null, 2));
+
     const productosVistas = response.rows
       .map((row) => {
         const pagePath = row.dimensionValues[0].value;
