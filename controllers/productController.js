@@ -139,7 +139,7 @@ exports.numeroVistasProducto = async (req, res) => {
                 fieldName: "eventName",
                 stringFilter: {
                   matchType: "EXACT",
-                  value: "Ver_Producto_nextjs", // Filtrar solo por el evento de visualización de producto
+                  value: "product_view", // Filtrar solo por el evento de visualización de producto
                 },
               },
             },
@@ -167,7 +167,7 @@ exports.numeroVistasProducto = async (req, res) => {
     if (response.rows && response.rows.length > 0) {
       const evento = response.rows[0];
       const vistas = parseInt(evento.metricValues[0].value, 10); // Convertir las vistas a número
-      console.log("Número de eventos Ver_Producto_nextjs:", vistas);
+      console.log("Número de eventos product_view:", vistas);
       res.status(200).json({ eventos: vistas });
     } else {
       console.log("No se encontraron eventos para el producto:", productoId);
@@ -201,7 +201,7 @@ exports.productosMasVistos = async (req, res) => {
           fieldName: "eventName",
           stringFilter: {
             matchType: "EXACT",
-            value: "Ver_Producto_nextjs",
+            value: "product_view",
           },
         },
       },
