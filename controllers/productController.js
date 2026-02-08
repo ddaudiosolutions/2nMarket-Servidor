@@ -187,7 +187,7 @@ exports.productosMasVistos = async (req, res) => {
       dateRanges: [
         {
           startDate: "28daysAgo",
-          endDate: "today",
+          endDate: "yesterday",
         },
       ],
       dimensions: [{ name: "pagePath" }],
