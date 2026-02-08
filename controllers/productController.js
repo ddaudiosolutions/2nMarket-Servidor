@@ -4,7 +4,7 @@ const cloudinary = require("cloudinary").v2;
 const transporter = require("../helpers/transporter.js");
 //const mongoose = require("mongoose");
 const slugify = require("slugify");
-const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+const { BetaAnalyticsDataClient } = require("@google-analytics/data");
 const getImageDetails = require("../cloudinary/utils.js");
 
 // Función auxiliar para crear el cliente de Analytics con credenciales
@@ -31,9 +31,8 @@ exports.crearProducto = async (req, res, next) => {
   try {
     //CREAR UN PRODUCTO
     const producto = new Producto(req.body);
-    console.log('crearProducto', producto);
+    console.log("crearProducto", producto);
     //PARA SUBIR VARIAS IMAGENES
-
 
     // Procesar cada archivo de imagen
     for (let file of req.files) {
@@ -53,12 +52,12 @@ exports.crearProducto = async (req, res, next) => {
           // Eliminar el archivo HEIC de Cloudinary después de la transformación
           await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
           console.log(
-            `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`
+            `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`,
           );
         } catch (error) {
           console.log(
             `Error al transformar o eliminar el archivo HEIC ${file.filename} de Cloudinary:`,
-            error
+            error,
           );
           // Manejar el error si la transformación o eliminación falla
         }
@@ -98,7 +97,10 @@ exports.crearProducto = async (req, res, next) => {
         try {
           await cloudinary.uploader.destroy(image.filename);
         } catch (deleteError) {
-          console.error(`Error al eliminar la imagen ${image.filename} de Cloudinary:`, deleteError);
+          console.error(
+            `Error al eliminar la imagen ${image.filename} de Cloudinary:`,
+            deleteError,
+          );
         }
       }
     }
@@ -109,7 +111,7 @@ exports.crearProducto = async (req, res, next) => {
 
 // Obtener las vistas de un producto específico cuando se visita su página
 exports.numeroVistasProducto = async (req, res) => {
-  console.log('mueriVistasProducto', req.body)
+  console.log("mueriVistasProducto", req.body);
   const { productoId } = req.body; // ID del producto desde los parámetros de la URL
   const analyticsDataClient = getAnalyticsClient();
   const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics
@@ -119,34 +121,34 @@ exports.numeroVistasProducto = async (req, res) => {
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: '2024-07-01', // Ajusta según lo necesario
-          endDate: 'today',        // Hasta el día de hoy
+          startDate: "2025-01-01", // Ajusta según lo necesario
+          endDate: "today", // Hasta el día de hoy
         },
       ],
       dimensions: [
-        { name: 'eventName' },       // Nombre del evento
-        { name: 'pagePath' },        // Ruta de la página, donde está el ID del producto
+        { name: "eventName" }, // Nombre del evento
+        { name: "pagePath" }, // Ruta de la página, donde está el ID del producto
       ],
       metrics: [
-        { name: 'eventCount' },      // Número de veces que se disparó el evento
+        { name: "eventCount" }, // Número de veces que se disparó el evento
       ],
       dimensionFilter: {
         andGroup: {
           expressions: [
             {
               filter: {
-                fieldName: 'eventName',
+                fieldName: "eventName",
                 stringFilter: {
-                  matchType: 'EXACT',
-                  value: 'Ver_Producto_nextjs', // Filtrar solo por el evento de visualización de producto
+                  matchType: "EXACT",
+                  value: "Ver_Producto_nextjs", // Filtrar solo por el evento de visualización de producto
                 },
               },
             },
             {
               filter: {
-                fieldName: 'pagePath', // La ruta donde aparece el productId
+                fieldName: "pagePath", // La ruta donde aparece el productId
                 stringFilter: {
-                  matchType: 'CONTAINS',
+                  matchType: "CONTAINS",
                   value: `/productos/${productoId}`, // Filtrar por el productId en la URL
                 },
               },
@@ -160,20 +162,23 @@ exports.numeroVistasProducto = async (req, res) => {
     if (response.rows.length > 0) {
       const evento = response.rows[0];
       const vistas = parseInt(evento.metricValues[0].value, 10); // Convertir las vistas a número
-      console.log('Número de eventos Ver_Producto_nextjs:', vistas);
+      console.log("Número de eventos Ver_Producto_nextjs:", vistas);
       res.status(200).json({ eventos: vistas });
     } else {
-      res.status(404).json({ message: 'No se encontraron eventos para este producto' });
+      res
+        .status(404)
+        .json({ message: "No se encontraron eventos para este producto" });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).send({ error: 'Hubo un error al obtener los datos del producto' });
+    res
+      .status(500)
+      .send({ error: "Hubo un error al obtener los datos del producto" });
   }
 };
 
-
 exports.productosMasVistos = async (req, res) => {
-  console.log('productosMasVistos')
+  console.log("productosMasVistos");
   const analyticsDataClient = getAnalyticsClient();
   const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics desde env
   try {
@@ -181,49 +186,53 @@ exports.productosMasVistos = async (req, res) => {
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: '28daysAgo',
-          endDate: 'yesterday',
+          startDate: "28daysAgo",
+          endDate: "today",
         },
       ],
-      dimensions: [
-        { name: 'pagePath' },
-      ],
-      metrics: [
-        { name: 'screenPageViews' },
-      ],
+      dimensions: [{ name: "customEvent:product_id" }],
+      metrics: [{ name: "eventCount" }],
+      dimensionFilter: {
+        filter: {
+          fieldName: "eventName",
+          stringFilter: {
+            matchType: "EXACT",
+            value: "Ver_Producto_nextjs",
+          },
+        },
+      },
       orderBys: [
         {
           desc: true,
-          metric: { metricName: 'screenPageViews' },
+          metric: { metricName: "eventCount" },
         },
       ],
       limit: 10,
     });
 
-    const productosVistas = response.rows.map(row => {
-      const pagePath = row.dimensionValues[0].value;
-      const vistas = parseInt(row.metricValues[0].value, 10); // Asegurarse de que las vistas sean numéricas            
+    const productosVistas = response.rows
+      .map((row) => {
+        const productId = row.dimensionValues[0].value;
+        const vistas = parseInt(row.metricValues[0].value, 10);
 
-      const regex = /^\/productos\/([a-fA-F0-9]{24})\/?$/;
-      const match = pagePath.match(regex);
-
-      if (match) {
-        const idProducto = match[1];
-        return { idProducto, vistas };
-      }
-      return undefined;
-    }).filter(producto => producto !== undefined)
+        // Validar que el productId sea un ObjectId válido de MongoDB (24 caracteres hexadecimales)
+        const regex = /^[a-fA-F0-9]{24}$/;
+        if (regex.test(productId)) {
+          return { idProducto: productId, vistas };
+        }
+        return undefined;
+      })
+      .filter((producto) => producto !== undefined)
       .sort((a, b) => b.vistas - a.vistas) // Ordenar de mayor a menor por vistas
       .slice(0, 6) // Tomar solo los primeros 6 productos
-      .map(producto => producto.idProducto); // Extraer solo los IDs // Filtra los undefined resultantes de paths que no cumplen con el patrón especificado
-    console.log('Productos más vistos:', productosVistas);
+      .map((producto) => producto.idProducto); // Extraer solo los IDs
+    console.log("Productos más vistos:", productosVistas);
     res.status(200).json({ productosVistas });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || "Hubo un Error" });
   }
-
-}
+};
 
 //OBTENER PRODUCTOS //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductos = async (req, res) => {
@@ -252,7 +261,10 @@ exports.obtenerProductos = async (req, res) => {
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
       .sort({ creado: -1 })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar  showPhone" });
+      .populate({
+        path: "author",
+        select: "nombre direccion telefono email imagesAvatar  showPhone",
+      });
 
     res.status(200).json({ prodAll, totalProductos, totalPages });
   } catch (error) {
@@ -275,8 +287,11 @@ exports.obtenerProductosUser = async (req, res) => {
       .sort({
         creado: -1,
       })
-      .populate({ path: "author", select: "nombre direccion telefono email showPhone" });
-    console.log('PRODUCTOSUSR', prodUser, totalProductosUs, totalPagesUs);
+      .populate({
+        path: "author",
+        select: "nombre direccion telefono email showPhone",
+      });
+    console.log("PRODUCTOSUSR", prodUser, totalProductosUs, totalPagesUs);
     res.json({ prodUser, totalProductosUs, totalPagesUs });
   } catch (error) {
     console.log(error);
@@ -295,9 +310,12 @@ exports.obtenerProductosAuthor = async (req, res) => {
       .sort({
         creado: -1,
       })
-      .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar  showPhone" });
+      .populate({
+        path: "author",
+        select: "nombre direccion telefono email imagesAvatar  showPhone",
+      });
 
-    console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
+    console.log("PRODUCTAUTHOR", prodAuth, totalProductosAuth);
     res.send({ prodAuth, totalProductosAuth });
   } catch (error) {
     console.log(error);
@@ -311,9 +329,12 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
       const totalProductosAuth = await Producto.countDocuments({ author: id });
       const prodAuth = await Producto.find({ author: id })
         .sort({ creado: -1 })
-        .populate({ path: "author", select: "nombre direccion telefono email imagesAvatar showPhone" });
+        .populate({
+          path: "author",
+          select: "nombre direccion telefono email imagesAvatar showPhone",
+        });
 
-      console.log('PRODUCTAUTHOR', prodAuth, totalProductosAuth);
+      console.log("PRODUCTAUTHOR", prodAuth, totalProductosAuth);
       resolve({ prodAuth, totalProductosAuth }); // Resuelve la promesa con los datos
     } catch (error) {
       console.log(error);
@@ -324,11 +345,11 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
 
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
-
   try {
     const productoId = await Producto.findById(req.params.id).populate({
       path: "author",
-      select: "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
+      select:
+        "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
     });
 
     res.json(productoId);
@@ -359,7 +380,7 @@ exports.editarProductoUser = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  console.log('editarProductoUser', req.body);
+  console.log("editarProductoUser", req.body);
   const {
     imagesDelete,
     title,
@@ -377,7 +398,7 @@ exports.editarProductoUser = async (req, res, next) => {
     pesoKgs,
     precioEstimado,
     reservado,
-    vendido
+    vendido,
   } = req.body;
 
   try {
@@ -432,9 +453,26 @@ exports.editarProductoUser = async (req, res, next) => {
       req.params.id,
       {
         $pull: { images: { filename: imagesDelete } },
-        $set: { title, categoria, subCategoria, price, description, contacto, delivery, ancho, largo, alto, pesoVolumetrico, pesoKgs, precioEstimado, balearicDelivery, reservado, vendido },
+        $set: {
+          title,
+          categoria,
+          subCategoria,
+          price,
+          description,
+          contacto,
+          delivery,
+          ancho,
+          largo,
+          alto,
+          pesoVolumetrico,
+          pesoKgs,
+          precioEstimado,
+          balearicDelivery,
+          reservado,
+          vendido,
+        },
       },
-      { new: true }
+      { new: true },
     );
 
     const images = [];
@@ -455,7 +493,7 @@ exports.editarProductoUser = async (req, res, next) => {
         // Eliminar el archivo HEIC de Cloudinary después de la transformación
         await cloudinary.uploader.destroy(file.filename); // Eliminar el archivo original de Cloudinary
         console.log(
-          `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`
+          `Archivo HEIC ${file.filename} eliminado de Cloudinary después de la transformación.`,
         );
       } else {
         if (file.size > 1000000) {
@@ -552,7 +590,7 @@ exports.eliminarProductoUserDelete = (id) => {
 
       // Si el producto tiene imágenes, eliminarlas en Cloudinary
       if (producto.images && producto.images.length > 0) {
-        const deletePromises = producto.images.map(image => {
+        const deletePromises = producto.images.map((image) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader.destroy(image.filename, function (err, result) {
               if (err) {
@@ -576,7 +614,6 @@ exports.eliminarProductoUserDelete = (id) => {
     }
   });
 };
-
 
 exports.findProductsByWords = async (req, res) => {
   let searchWords = req.body.searchWord; // Replace with your array of words
@@ -602,12 +639,12 @@ exports.findProductsByWords = async (req, res) => {
 
 exports.envioPegatinas = async (req, res) => {
   const { message } = req.body;
-  console.log('gestionPegatinas', req.body);
+  console.log("gestionPegatinas", req.body);
   try {
     // Configuración del correo electrónico
     const mailOptions = {
       from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
-      to: 'infowindymarket@gmail.com', // Cambia esto para enviar al vendedor
+      to: "infowindymarket@gmail.com", // Cambia esto para enviar al vendedor
       subject: `Petición de pegatinas para envio`,
       html: `<p>Saludos, info@windymarket.es</p>
             <p>${message.nombreRemi} necesita las pegatinas para el envio de un producto a ${message.nombreDesti}</p>
@@ -632,7 +669,7 @@ exports.envioPegatinas = async (req, res) => {
             <h5> Largo: ${message.largo}</h5>
             <h5> PesoKgs: ${message.pesoKgs}</h5>
             <h5> PesoVolumetrico: ${message.pesoVolumetrico}</h5>            
-            `
+            `,
     };
 
     // Enviar el correo electrónico
@@ -648,13 +685,13 @@ exports.envioPegatinas = async (req, res) => {
 
 exports.editReservedState = async (req, res) => {
   const { productId, reservado } = req.body;
-  console.log('editReservedState', req.body);
+  console.log("editReservedState", req.body);
   try {
     // Actualizar el estado reservado del producto
     const producto = await Producto.findByIdAndUpdate(
       productId,
       { $set: { reservado: reservado } },
-      { new: true }
+      { new: true },
     );
 
     // Respuesta exitosa
@@ -667,13 +704,13 @@ exports.editReservedState = async (req, res) => {
 
 exports.editVendidoState = async (req, res) => {
   const { productId, vendido } = req.body;
-  console.log('editVendidoState', req.body);
+  console.log("editVendidoState", req.body);
   try {
     // Actualizar el estado reservado del producto
     const producto = await Producto.findByIdAndUpdate(
       productId,
       { $set: { vendido: vendido } },
-      { new: true }
+      { new: true },
     );
 
     // Respuesta exitosa
@@ -683,5 +720,3 @@ exports.editVendidoState = async (req, res) => {
     res.status(500).send("Error al actualizar el estado reservado");
   }
 };
-
-
