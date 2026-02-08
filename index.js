@@ -30,6 +30,15 @@ app.use(express.urlencoded({ extended: true }));
 //2 PUERTO DE LA APP
 const port = process.env.PORT || 4000; //debe ser un servidor diferente al cliente(3000)
 
+// Health check endpoint para Railway
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'WindyMarket API is running' });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Configuración de Prerender.io
 /* app.use(prerender.set('prerenderToken', process.env.PRERENDER)); */
 //IMPORTAR RUTAS
