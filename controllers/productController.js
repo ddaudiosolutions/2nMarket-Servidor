@@ -7,6 +7,18 @@ const slugify = require("slugify");
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const getImageDetails = require("../cloudinary/utils.js");
 
+// Función auxiliar para crear el cliente de Analytics con credenciales
+const getAnalyticsClient = () => {
+  const credentials = {
+    client_email: process.env.CLIENT_EMAIL,
+    private_key: process.env.PRIVATE_KEY,
+  };
+
+  return new BetaAnalyticsDataClient({
+    credentials: credentials,
+  });
+};
+
 exports.crearProducto = async (req, res, next) => {
   //REVISAR SI HAY ERRORES
   const errors = validationResult(req);
@@ -99,8 +111,8 @@ exports.crearProducto = async (req, res, next) => {
 exports.numeroVistasProducto = async (req, res) => {
   console.log('mueriVistasProducto', req.body)
   const { productoId } = req.body; // ID del producto desde los parámetros de la URL
-  const analyticsDataClient = new BetaAnalyticsDataClient();
-  const propertyId = '338632609'; // ID de propiedad de Google Analytics
+  const analyticsDataClient = getAnalyticsClient();
+  const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics
 
   try {
     const [response] = await analyticsDataClient.runReport({
@@ -162,8 +174,8 @@ exports.numeroVistasProducto = async (req, res) => {
 
 exports.productosMasVistos = async (req, res) => {
   console.log('productosMasVistos')
-  const analyticsDataClient = new BetaAnalyticsDataClient();
-  const propertyId = '338632609'; // Asegúrate de reemplazar esto con tu ID de propiedad de Google Analytics
+  const analyticsDataClient = getAnalyticsClient();
+  const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics desde env
   try {
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
