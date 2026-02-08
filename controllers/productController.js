@@ -190,7 +190,7 @@ exports.productosMasVistos = async (req, res) => {
           endDate: "today",
         },
       ],
-      dimensions: [{ name: "customEvent:product_id" }],
+      dimensions: [{ name: "product_id" }],
       metrics: [{ name: "eventCount" }],
       dimensionFilter: {
         filter: {
