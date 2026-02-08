@@ -121,12 +121,11 @@ exports.numeroVistasProducto = async (req, res) => {
       property: `properties/${propertyId}`,
       dateRanges: [
         {
-          startDate: "2025-01-01", // Ajusta según lo necesario
-          endDate: "today", // Hasta el día de hoy
+          startDate: "28daysAgo",
+          endDate: "yesterday",
         },
       ],
       dimensions: [
-        { name: "eventName" }, // Nombre del evento
         { name: "pagePath" }, // Ruta de la página, donde está el ID del producto
       ],
       metrics: [
@@ -158,16 +157,20 @@ exports.numeroVistasProducto = async (req, res) => {
       },
     });
 
+    console.log(`Response rows for product ${productoId}:`, response.rows?.length || 0);
+    console.log("Rows data:", JSON.stringify(response.rows, null, 2));
+
     // Procesar los resultados para obtener los eventos específicos
-    if (response.rows.length > 0) {
+    if (response.rows && response.rows.length > 0) {
       const evento = response.rows[0];
       const vistas = parseInt(evento.metricValues[0].value, 10); // Convertir las vistas a número
       console.log("Número de eventos Ver_Producto_nextjs:", vistas);
       res.status(200).json({ eventos: vistas });
     } else {
+      console.log("No se encontraron eventos para el producto:", productoId);
       res
-        .status(404)
-        .json({ message: "No se encontraron eventos para este producto" });
+        .status(200)
+        .json({ eventos: 0 });
     }
   } catch (err) {
     console.error(err);
