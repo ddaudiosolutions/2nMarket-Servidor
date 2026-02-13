@@ -112,7 +112,7 @@ exports.crearProducto = async (req, res, next) => {
 // Obtener las vistas de un producto específico cuando se visita su página
 exports.numeroVistasProducto = async (req, res) => {
   console.log("mueriVistasProducto", req.body);
-  const { productoId } = req.body; // ID del producto desde los parámetros de la URL
+  const { productId } = req.body; // ID del producto desde los parámetros de la URL
   const analyticsDataClient = getAnalyticsClient();
   const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics
 
@@ -148,7 +148,7 @@ exports.numeroVistasProducto = async (req, res) => {
                 fieldName: "pagePath", // La ruta donde aparece el productId
                 stringFilter: {
                   matchType: "CONTAINS",
-                  value: `/productos/${productoId}`, // Filtrar por el productId en la URL
+                  value: `/productos/${productId}`, // Filtrar por el productId en la URL
                 },
               },
             },
@@ -158,7 +158,7 @@ exports.numeroVistasProducto = async (req, res) => {
     });
 
     console.log(
-      `Response rows for product ${productoId}:`,
+      `Response rows for product ${productId}:`,
       response.rows?.length || 0,
     );
     console.log("Rows data:", JSON.stringify(response.rows, null, 2));
@@ -170,7 +170,7 @@ exports.numeroVistasProducto = async (req, res) => {
       console.log("Número de eventos product_view:", vistas);
       res.status(200).json({ eventos: vistas });
     } else {
-      console.log("No se encontraron eventos para el producto:", productoId);
+      console.log("No se encontraron eventos para el producto:", productId);
       res.status(200).json({ eventos: 0 });
     }
   } catch (err) {
@@ -254,11 +254,11 @@ exports.obtenerProductos = async (req, res) => {
   let busquedaValue = {};
   //console.log(busquedaValue);
   if (busqueda === "ultimos_productos") {
-    busquedaValue = {};
+    busquedaValue = { activo: true };
     limit = 5;
     // PAGE_SIZE = limit
   } else {
-    busquedaValue = { categoria: busqueda };
+    busquedaValue = { categoria: busqueda, activo: true };
     limit = 10;
     //PAGE_SIZE = limit
   }
@@ -272,7 +272,7 @@ exports.obtenerProductos = async (req, res) => {
     const prodAll = await Producto.find(busquedaValue)
       .limit(PAGE_SIZE)
       .skip(PAGE_SIZE * page)
-      .sort({ creado: -1 })
+      .sort({ creado: -1, _id: -1 })
       .populate({
         path: "author",
         select: "nombre direccion telefono email imagesAvatar  showPhone",
@@ -298,6 +298,7 @@ exports.obtenerProductosUser = async (req, res) => {
       // .skip(PAGE_SIZE * page)
       .sort({
         creado: -1,
+        _id: -1,
       })
       .populate({
         path: "author",
@@ -314,20 +315,34 @@ exports.obtenerProductosUser = async (req, res) => {
 exports.obtenerProductosAuthor = async (req, res) => {
   const id = req.params.id;
   try {
-    const totalProductosAuth = await Producto.countDocuments({
-      author: req.params.id,
-    });
+    // Verificar si el usuario autenticado es el propietario del perfil
+    const esPropio = req.user && req.user.id === req.params.id;
 
-    const prodAuth = await Producto.find({ author: req.params.id })
+    // Si es el propietario, mostrar todos los productos (incluyendo inactivos)
+    // Si no, mostrar solo productos activos
+    const filtro = esPropio
+      ? { author: req.params.id }
+      : { author: req.params.id, activo: true };
+
+    const totalProductosAuth = await Producto.countDocuments(filtro);
+
+    const prodAuth = await Producto.find(filtro)
       .sort({
         creado: -1,
+        _id: -1,
       })
       .populate({
         path: "author",
         select: "nombre direccion telefono email imagesAvatar  showPhone",
       });
 
-    console.log("PRODUCTAUTHOR", prodAuth, totalProductosAuth);
+    console.log(
+      "PRODUCTAUTHOR",
+      prodAuth,
+      totalProductosAuth,
+      "esPropio:",
+      esPropio,
+    );
     res.send({ prodAuth, totalProductosAuth });
   } catch (error) {
     console.log(error);
@@ -340,7 +355,7 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
     try {
       const totalProductosAuth = await Producto.countDocuments({ author: id });
       const prodAuth = await Producto.find({ author: id })
-        .sort({ creado: -1 })
+        .sort({ creado: -1, _id: -1 })
         .populate({
           path: "author",
           select: "nombre direccion telefono email imagesAvatar showPhone",
@@ -482,6 +497,7 @@ exports.editarProductoUser = async (req, res, next) => {
           balearicDelivery,
           reservado,
           vendido,
+          fechaActualizacion: new Date(),
         },
       },
       { new: true },
@@ -632,11 +648,16 @@ exports.findProductsByWords = async (req, res) => {
 
   try {
     const producto = await Producto.find({
-      $or: [
-        { title: { $regex: `${searchWords}`, $options: "i" } },
-        { description: { $regex: `${searchWords}`, $options: "i" } },
-        { categoria: { $regex: `${searchWords}`, $options: "i" } },
-        { subCategoria: { $regex: `${searchWords}`, $options: "i" } },
+      $and: [
+        { activo: true },
+        {
+          $or: [
+            { title: { $regex: `${searchWords}`, $options: "i" } },
+            { description: { $regex: `${searchWords}`, $options: "i" } },
+            { categoria: { $regex: `${searchWords}`, $options: "i" } },
+            { subCategoria: { $regex: `${searchWords}`, $options: "i" } },
+          ],
+        },
       ],
     }).populate({
       path: "author",
@@ -730,5 +751,92 @@ exports.editVendidoState = async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar el estado reservado:", error);
     res.status(500).send("Error al actualizar el estado reservado");
+  }
+};
+
+exports.reactivarProducto = async (req, res) => {
+  const { productId } = req.body;
+  console.log("reactivarProducto", req.body);
+  console.log("Usuario autenticado:", req.user);
+  try {
+    // Verificar que el producto existe
+    const producto = await Producto.findById(productId);
+    console.log(
+      "Producto encontrado:",
+      producto
+        ? `${producto.title} - activo: ${producto.activo}`
+        : "NO ENCONTRADO",
+    );
+
+    if (!producto) {
+      console.log("❌ Producto no encontrado");
+      return res.status(404).json({ msg: "Producto no encontrado" });
+    }
+
+    // Verificar que el usuario es el propietario
+    console.log(
+      "Verificando propietario - producto.author:",
+      producto.author.toString(),
+      "req.user.id:",
+      req.user.id,
+    );
+    if (producto.author.toString() !== req.user.id) {
+      console.log("❌ Usuario no autorizado");
+      return res.status(401).json({ msg: "No autorizado" });
+    }
+
+    // Reactivar el producto
+    console.log("✅ Reactivando producto...");
+    const productoActualizado = await Producto.findByIdAndUpdate(
+      productId,
+      {
+        $set: {
+          activo: true,
+          fechaReactivar: new Date(),
+        },
+      },
+      { new: true },
+    );
+
+    console.log(
+      "✅ Producto reactivado:",
+      productoActualizado.title,
+      "- activo:",
+      productoActualizado.activo,
+    );
+    res.status(200).json({ producto: productoActualizado });
+  } catch (error) {
+    console.error("❌ Error al reactivar el producto:", error);
+    res.status(500).send("Error al reactivar el producto");
+  }
+};
+
+exports.desactivarProducto = async (req, res) => {
+  const { productId } = req.body;
+  console.log("desactivarProducto", req.body);
+  try {
+    // Verificar que el producto existe
+    const producto = await Producto.findById(productId);
+
+    if (!producto) {
+      return res.status(404).json({ msg: "Producto no encontrado" });
+    }
+
+    // Verificar que el usuario es el propietario
+    if (producto.author.toString() !== req.user.id) {
+      return res.status(401).json({ msg: "No autorizado" });
+    }
+
+    // Desactivar el producto
+    const productoActualizado = await Producto.findByIdAndUpdate(
+      productId,
+      { $set: { activo: false } },
+      { new: true },
+    );
+
+    res.status(200).json({ producto: productoActualizado });
+  } catch (error) {
+    console.error("Error al desactivar el producto:", error);
+    res.status(500).send("Error al desactivar el producto");
   }
 };

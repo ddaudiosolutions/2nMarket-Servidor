@@ -79,6 +79,18 @@ const windfoilproductSchema = new Schema({
   },
   vendido: {
     type: Boolean,
+  },
+  activo: {
+    type: Boolean,
+    default: true
+  },
+  fechaActualizacion: {
+    type: Date,
+    default: null
+  },
+  fechaReactivar: {
+    type: Date,
+    default: null
   }
 
 

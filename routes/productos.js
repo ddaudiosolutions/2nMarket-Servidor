@@ -29,9 +29,10 @@ router.get(
 );
 
 //OBTENER TODOS LOS PRODUCTOS de un AUTOR
+const optionalAuth = require("../middleware/optionalAuth");
 router.get(
   "/auth/:id",
-  //auth,
+  optionalAuth,
   productController.obtenerProductosAuthor
 );
 
@@ -67,6 +68,12 @@ router.post('/editReservedState', productController.editReservedState);
 
 // HANDLE ESTADO VENDIDO
 router.post('/editVendidoState', productController.editVendidoState);
+
+// REACTIVAR PRODUCTO
+router.post('/reactivarProducto', auth, productController.reactivarProducto);
+
+// DESACTIVAR PRODUCTO
+router.post('/desactivarProducto', auth, productController.desactivarProducto);
 
 
 module.exports = router;

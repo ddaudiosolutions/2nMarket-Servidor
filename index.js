@@ -2,6 +2,7 @@ const express = require("express");
 
 const conectarDB = require("./config/db");
 const cors = require("cors");
+const { iniciarCronJobs } = require("./cronJobs");
 /* const prerender = require("prerender-node"); */
 
 //1 CREAMOS EL SERVIDOR
@@ -55,4 +56,7 @@ conectarDB().then(() => {
   app.listen(port, () => {
     console.log(`Corriendo SERVIDOR en PORT:  ${port}`);
   });
+
+  // Iniciar cron jobs
+  iniciarCronJobs();
 });
