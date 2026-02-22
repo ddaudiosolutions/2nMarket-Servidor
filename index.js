@@ -58,5 +58,5 @@ conectarDB().then(() => {
   });
 
   // Iniciar cron jobs
-  iniciarCronJobs();
+  // iniciarCronJobs(); // ⚠️ DESACTIVADO TEMPORALMENTE - Reactivar cuando los campos estén en producción
 });
