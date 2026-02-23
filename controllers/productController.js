@@ -1,7 +1,8 @@
 const Producto = require("../models/ProductModel");
 const { validationResult } = require("express-validator");
 const cloudinary = require("cloudinary").v2;
-const transporter = require("../helpers/transporter.js");
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 //const mongoose = require("mongoose");
 const slugify = require("slugify");
 const { BetaAnalyticsDataClient } = require("@google-analytics/data");
@@ -674,12 +675,11 @@ exports.envioPegatinas = async (req, res) => {
   const { message } = req.body;
   console.log("gestionPegatinas", req.body);
   try {
-    // Configuración del correo electrónico
-    const mailOptions = {
-      from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
-      to: "infowindymarket@gmail.com", // Cambia esto para enviar al vendedor
+    const { error } = await resend.emails.send({
+      from: "WindyMarket <noreply@windymarket.es>",
+      to: "infowindymarket@gmail.com",
       subject: `Petición de pegatinas para envio`,
-      html: `<p>Saludos, info@windymarket.es</p>
+      html: `<p>Saludos, infowindymarket@gmail.com</p>
             <p>${message.nombreRemi} necesita las pegatinas para el envio de un producto a ${message.nombreDesti}</p>
             <h3> SusDatos:</h3><br>
             <h4> Remitente: </h4>
@@ -695,18 +695,17 @@ exports.envioPegatinas = async (req, res) => {
             <h5> Dirección completa: ${message.direccionDesti}</h5>
             <h5> Población y CP: ${message.poblacionDesti} ${message.codigoPostalDesti}</h5>
             <h5> Tél. móvil: ${message.telefonoDesti}</h5>
-            <h5> e-mail: ${message.emailDesti}</h5><br>            
+            <h5> e-mail: ${message.emailDesti}</h5><br>
             <h4> Datos Paquete: </h4>
             <h5> Alto: ${message.alto}</h5>
             <h5> Ancho: ${message.ancho}</h5>
             <h5> Largo: ${message.largo}</h5>
             <h5> PesoKgs: ${message.pesoKgs}</h5>
-            <h5> PesoVolumetrico: ${message.pesoVolumetrico}</h5>            
+            <h5> PesoVolumetrico: ${message.pesoVolumetrico}</h5>
             `,
-    };
+    });
 
-    // Enviar el correo electrónico
-    await transporter.sendMail(mailOptions);
+    if (error) throw new Error(error.message);
 
     // Respuesta exitosa
     res.status(200).send("Correo enviado correctamente");

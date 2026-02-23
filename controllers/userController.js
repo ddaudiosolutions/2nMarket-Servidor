@@ -5,7 +5,8 @@ const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator"); //usamos esto para validar lo que hemos programado en userRoutes con check
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
-const transporter = require("../helpers/transporter.js");
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 const fs = require("fs");
 const { obtenerProductosAuthorDeleteUser, eliminarProductoUserDelete } = require("./productController.js")
 
@@ -167,10 +168,9 @@ exports.correoEntreUsuarios = async (req, res) => {
   const { productId, sellerEmail, sellerName, senderEmail, message, senderUserName } = req.body;
 
   try {
-    // Configuración del correo electrónico
-    const mailOptions = {
-      from: process.env.EMAIL_USER, // Cambia esto con tu dirección de correo
-      to: sellerEmail, // Cambia esto para enviar al vendedor
+    const { error } = await resend.emails.send({
+      from: "WindyMarket <noreply@windymarket.es>",
+      to: sellerEmail,
       subject: `Consulta sobre el producto ${productId}`,
       html: `<p>Hola,${sellerName}</p>
             <p>${senderUserName} está interesado en tu producto https://www.windymarket.es/productos/${productId}</p>
@@ -178,10 +178,9 @@ exports.correoEntreUsuarios = async (req, res) => {
             <h4>${message}</h4>
             <p><strong>Recuerda que para contactar con el interesado NO debes contestar a este correo directamente.</strong></p>
             <p><strong>Contacta con ${senderUserName} a través de su Correo: <h3>${senderEmail}</h3></strong></p>`,
-    };
+    });
 
-    // Enviar el correo electrónico
-    await transporter.sendMail(mailOptions);
+    if (error) throw new Error(error.message);
 
     // Respuesta exitosa
     res.status(200).send("Correo enviado correctamente");

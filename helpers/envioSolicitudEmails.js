@@ -1,14 +1,17 @@
-const transporter = require('./transporter');
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const franjaLabel = {
-  manana:       'Mañana (9h–13h)',
-  tarde:        'Tarde (14h–18h)',
-  dia_completo: 'Día completo',
+  manana: "Mañana (9h–13h)",
+  tarde: "Tarde (14h–18h)",
+  dia_completo: "Día completo",
 };
 
 const pesoLabel = (pesoVolumetrico) => {
-  if (pesoVolumetrico === -2) return 'Económico — bulto largo/mástil (girth ≤ 2.90m)';
-  if (pesoVolumetrico === -1) return 'Por peso (accesorios, dim ≤ 1.20m)';
+  if (pesoVolumetrico === -2)
+    return "Económico — bulto largo/mástil (girth ≤ 2.90m)";
+  if (pesoVolumetrico === -1) return "Por peso (accesorios, dim ≤ 1.20m)";
   return `Volumétrico (${pesoVolumetrico} kg vol.)`;
 };
 
@@ -17,16 +20,30 @@ const pesoLabel = (pesoVolumetrico) => {
  */
 const enviarEmailAdminNuevaSolicitud = async (solicitud) => {
   const {
-    nombreRemi, telefonoRemi, emailRemi, direccionRemi, poblacion_CPRemi,
-    nombreDesti, telefonoDesti, emailDesti, direccionDesti, poblacion_CPDesti,
-    alto, ancho, largo, pesoVolumetrico, pesoKgs,
-    balearicDelivery, precioEstimado,
-    tipoRecogida, franjaHoraria,
+    nombreRemi,
+    telefonoRemi,
+    emailRemi,
+    direccionRemi,
+    poblacion_CPRemi,
+    nombreDesti,
+    telefonoDesti,
+    emailDesti,
+    direccionDesti,
+    poblacion_CPDesti,
+    alto,
+    ancho,
+    largo,
+    pesoVolumetrico,
+    pesoKgs,
+    balearicDelivery,
+    precioEstimado,
+    tipoRecogida,
+    franjaHoraria,
     _id,
   } = solicitud;
 
-  const info = await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+  const { data, error } = await resend.emails.send({
+    from: "WindyMarket <noreply@windymarket.es>",
     to: process.env.ADMIN_EMAIL,
     subject: `Nueva solicitud de envío — ${nombreRemi} → ${nombreDesti}`,
     html: `
@@ -56,21 +73,25 @@ const enviarEmailAdminNuevaSolicitud = async (solicitud) => {
         <li><strong>Dimensiones (alto × ancho × largo):</strong> ${alto}m × ${ancho}m × ${largo}m</li>
         <li><strong>Tipo tarifa:</strong> ${pesoLabel(pesoVolumetrico)}</li>
         <li><strong>Peso real (kg):</strong> ${pesoKgs}</li>
-        <li><strong>Envío a Baleares:</strong> ${balearicDelivery ? 'Sí' : 'No'}</li>
+        <li><strong>Envío a Baleares:</strong> ${balearicDelivery ? "Sí" : "No"}</li>
         <li><strong>Precio estimado:</strong> ${precioEstimado}€</li>
       </ul>
 
       <h3>Recogida</h3>
       <ul>
-        <li><strong>Tipo:</strong> ${tipoRecogida === 'domicilio' ? 'Recogida en domicilio' : 'Punto de recogida'}</li>
-        ${franjaHoraria ? `<li><strong>Franja horaria:</strong> ${franjaLabel[franjaHoraria] || franjaHoraria}</li>` : ''}
+        <li><strong>Tipo:</strong> ${tipoRecogida === "domicilio" ? "Recogida en domicilio" : "Punto de recogida"}</li>
+        ${franjaHoraria ? `<li><strong>Franja horaria:</strong> ${franjaLabel[franjaHoraria] || franjaHoraria}</li>` : ""}
       </ul>
 
       <p>Accede al panel de administración para confirmar la solicitud e introducir el precio real.</p>
     `,
   });
 
-  console.log('Email admin solicitud enviado: %s', info.messageId);
+  if (error) {
+    console.error("Error enviando email admin solicitud:", error);
+  } else {
+    console.log("Email admin solicitud enviado:", data.id);
+  }
 };
 
 /**
@@ -78,20 +99,23 @@ const enviarEmailAdminNuevaSolicitud = async (solicitud) => {
  */
 const enviarEmailClienteConfirmacion = async (solicitud) => {
   const {
-    nombreRemi, emailRemi,
-    tipoRecogida, franjaHoraria,
-    precioReal, notas,
+    nombreRemi,
+    emailRemi,
+    tipoRecogida,
+    franjaHoraria,
+    precioReal,
+    notas,
   } = solicitud;
 
   const recogidaTexto =
-    tipoRecogida === 'domicilio'
+    tipoRecogida === "domicilio"
       ? `Recogida en domicilio — ${franjaLabel[franjaHoraria] || franjaHoraria}`
-      : 'Punto de recogida';
+      : "Punto de recogida";
 
-  const info = await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+  const { data, error } = await resend.emails.send({
+    from: "WindyMarket <noreply@windymarket.es>",
     to: emailRemi,
-    subject: 'Tu solicitud de envío WindyMarket — Precio confirmado',
+    subject: "Tu solicitud de envío WindyMarket — Precio confirmado",
     html: `
       <p>Hola ${nombreRemi},</p>
 
@@ -100,18 +124,25 @@ const enviarEmailClienteConfirmacion = async (solicitud) => {
       <ul>
         <li><strong>Precio definitivo:</strong> ${precioReal}€ (IVA incluido)</li>
         <li><strong>Recogida:</strong> ${recogidaTexto}</li>
-        ${notas ? `<li><strong>Nota:</strong> ${notas}</li>` : ''}
+        ${notas ? `<li><strong>Nota:</strong> ${notas}</li>` : ""}
       </ul>
 
       <p>Para confirmar el envío, realiza el pago mediante Bizum o transferencia bancaria
       a los datos que te facilitaremos por teléfono o email.</p>
 
       <br/>
-      <p>WindyMarket / TRINIsend</p>
+      <p> WindyMarket </p>
     `,
   });
 
-  console.log('Email cliente confirmación enviado: %s', info.messageId);
+  if (error) {
+    console.error("Error enviando email cliente confirmación:", error);
+  } else {
+    console.log("Email cliente confirmación enviado:", data.id);
+  }
 };
 
-module.exports = { enviarEmailAdminNuevaSolicitud, enviarEmailClienteConfirmacion };
+module.exports = {
+  enviarEmailAdminNuevaSolicitud,
+  enviarEmailClienteConfirmacion,
+};
