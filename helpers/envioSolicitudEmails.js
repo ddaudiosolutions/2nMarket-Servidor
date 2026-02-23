@@ -127,11 +127,15 @@ const enviarEmailClienteConfirmacion = async (solicitud) => {
         ${notas ? `<li><strong>Nota:</strong> ${notas}</li>` : ""}
       </ul>
 
-      <p>Para confirmar el envío, realiza el pago mediante Bizum o transferencia bancaria
-      a los datos que te facilitaremos por teléfono o email.</p>
+      <h3>Cómo realizar el pago</h3>
+      <p>Envía el importe de <strong>${precioReal}€</strong> por <strong>Bizum</strong> al número:</p>
+      <h2>${process.env.BIZUM_PHONE}</h2>
+      <p>Como concepto indica: <strong>TRINIsend ${emailRemi}</strong></p>
+
+      <p>Una vez recibido el pago, te enviaremos las etiquetas de envío.</p>
 
       <br/>
-      <p> WindyMarket </p>
+      <p>WindyMarket / TRINIsend</p>
     `,
   });
 
@@ -142,7 +146,78 @@ const enviarEmailClienteConfirmacion = async (solicitud) => {
   }
 };
 
+/**
+ * Email al admin avisando de que el pago ha sido marcado como recibido.
+ */
+const enviarEmailAdminPagoRecibido = async (solicitud) => {
+  const { nombreRemi, emailRemi, telefonoRemi, precioReal, _id } = solicitud;
+
+  const { data, error } = await resend.emails.send({
+    from: "WindyMarket <noreply@windymarket.es>",
+    to: process.env.ADMIN_EMAIL,
+    subject: `✅ Pago recibido — ${nombreRemi} (${precioReal}€)`,
+    html: `
+      <h2>Pago confirmado — prepara las etiquetas</h2>
+      <p><strong>ID solicitud:</strong> ${_id}</p>
+      <ul>
+        <li><strong>Remitente:</strong> ${nombreRemi}</li>
+        <li><strong>Email:</strong> ${emailRemi}</li>
+        <li><strong>Teléfono:</strong> ${telefonoRemi}</li>
+        <li><strong>Importe cobrado:</strong> ${precioReal}€</li>
+      </ul>
+      <p>Accede al panel de administración para generar y enviar las etiquetas.</p>
+    `,
+  });
+
+  if (error) {
+    console.error("Error enviando email admin pago recibido:", error);
+  } else {
+    console.log("Email admin pago recibido enviado:", data.id);
+  }
+};
+
+/**
+ * Email al cliente con las etiquetas de envío adjuntas.
+ * @param {Object} solicitud
+ * @param {{ filename: string, content: Buffer }} attachment
+ */
+const enviarEmailClienteEtiquetas = async (solicitud, attachments) => {
+  const { nombreRemi, emailRemi, nombreDesti } = solicitud;
+
+  const { data, error } = await resend.emails.send({
+    from: "WindyMarket <noreply@windymarket.es>",
+    to: emailRemi,
+    subject: "TRINIsend — Tus etiquetas de envío",
+    html: `
+      <p>Hola ${nombreRemi},</p>
+
+      <p>¡Tu pago ha sido confirmado! Adjunto encontrarás las etiquetas de envío para tu paquete con destino a <strong>${nombreDesti}</strong>.</p>
+
+      <p>Instrucciones:</p>
+      <ol>
+        <li>Imprime las etiquetas adjuntas.</li>
+        <li>Pégalas bien visibles en el paquete.</li>
+        <li>Lleva el paquete al punto de recogida o espera al repartidor si elegiste recogida en domicilio.</li>
+      </ol>
+
+      <p>Si tienes cualquier duda, responde a este email o contáctanos.</p>
+
+      <br/>
+      <p>WindyMarket / TRINIsend</p>
+    `,
+    attachments,
+  });
+
+  if (error) {
+    console.error("Error enviando email etiquetas al cliente:", error);
+  } else {
+    console.log("Email etiquetas enviado al cliente:", data.id);
+  }
+};
+
 module.exports = {
   enviarEmailAdminNuevaSolicitud,
   enviarEmailClienteConfirmacion,
+  enviarEmailAdminPagoRecibido,
+  enviarEmailClienteEtiquetas,
 };

@@ -46,6 +46,7 @@ const envioSolicitudSchema = new mongoose.Schema(
     },
     precioReal: { type: Number },
     notas:      { type: String },
+    pagado:     { type: Boolean, default: false },
 
     // ── Usuario (opcional, puede ser guest) ────
     usuarioId: {

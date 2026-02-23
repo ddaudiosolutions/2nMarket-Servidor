@@ -1,8 +1,13 @@
+const multer = require('multer');
 const EnvioSolicitud = require('../models/EnvioSolicitud');
 const {
   enviarEmailAdminNuevaSolicitud,
   enviarEmailClienteConfirmacion,
+  enviarEmailAdminPagoRecibido,
+  enviarEmailClienteEtiquetas,
 } = require('../helpers/envioSolicitudEmails');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // POST /api/envios/solicitudes
 // Pública — cualquier usuario (incluido guest) puede crear una solicitud
@@ -108,6 +113,38 @@ const confirmarSolicitud = async (req, res) => {
   }
 };
 
+// PUT /api/envios/solicitudes/:id/pago
+// Admin marca el pago Bizum como recibido
+const marcarPagado = async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({ msg: 'Acceso denegado' });
+    }
+
+    const solicitud = await EnvioSolicitud.findById(req.params.id);
+
+    if (!solicitud) {
+      return res.status(404).json({ msg: 'Solicitud no encontrada' });
+    }
+
+    if (solicitud.estado !== 'confirmada') {
+      return res.status(400).json({ msg: 'Solo se puede marcar como pagada una solicitud confirmada' });
+    }
+
+    solicitud.pagado = true;
+    await solicitud.save();
+
+    enviarEmailAdminPagoRecibido(solicitud).catch((err) =>
+      console.error('Error enviando email admin pago recibido:', err)
+    );
+
+    return res.status(200).json(solicitud);
+  } catch (error) {
+    console.error('Error marcando solicitud como pagada:', error);
+    return res.status(500).json({ msg: 'Error del servidor' });
+  }
+};
+
 // PUT /api/envios/solicitudes/:id/completar
 // Marca la solicitud como completada (pegatinas enviadas, envío en marcha)
 const completarSolicitud = async (req, res) => {
@@ -116,14 +153,28 @@ const completarSolicitud = async (req, res) => {
       return res.status(403).json({ msg: 'Acceso denegado' });
     }
 
-    const solicitud = await EnvioSolicitud.findByIdAndUpdate(
-      req.params.id,
-      { estado: 'completada' },
-      { new: true }
-    );
+    const solicitud = await EnvioSolicitud.findById(req.params.id);
 
     if (!solicitud) {
       return res.status(404).json({ msg: 'Solicitud no encontrada' });
+    }
+
+    if (!solicitud.pagado) {
+      return res.status(400).json({ msg: 'No se puede completar una solicitud sin pago confirmado' });
+    }
+
+    solicitud.estado = 'completada';
+    await solicitud.save();
+
+    if (req.files && req.files.length > 0) {
+      const attachments = req.files.map((file) => ({
+        filename: file.originalname,
+        content: file.buffer,
+        content_type: file.mimetype,
+      }));
+      enviarEmailClienteEtiquetas(solicitud, attachments).catch((err) =>
+        console.error('Error enviando email etiquetas al cliente:', err)
+      );
     }
 
     return res.status(200).json(solicitud);
@@ -133,4 +184,4 @@ const completarSolicitud = async (req, res) => {
   }
 };
 
-module.exports = { crearSolicitud, obtenerSolicitudes, confirmarSolicitud, completarSolicitud };
+module.exports = { crearSolicitud, obtenerSolicitudes, confirmarSolicitud, marcarPagado, completarSolicitud, upload };
