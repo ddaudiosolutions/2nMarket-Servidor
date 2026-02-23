@@ -42,6 +42,7 @@ exports.autenticarUser = async (req, res) => {
         nombre: user.nombre,
         // Agregamos una bandera para identificar si es un superusuario
         isSuperUser: isSuperUser,
+        isAdmin: user.isAdmin || false,
       },
     };
 
@@ -66,7 +67,7 @@ exports.autenticarUser = async (req, res) => {
 //Obtiene que usuario esta autenticado
 exports.usuarioAutenticado = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("password").select("nombre");
+    const user = await User.findById(req.user.id).select("-password");
     console.log("autenticadoUSER", user);
     res.json({ user });
   } catch (error) {
@@ -95,6 +96,46 @@ exports.forgotPassword = async (req, res) => {
     return res.status(200).json({ msg: "Hemos enviado un email con las instrucciones" });
   } catch (error) {
     console.log(error);
+  }
+};
+
+// POST /api/auth/impersonate/:userId
+// Solo admin — devuelve un token válido para el usuario indicado
+exports.impersonateUser = async (req, res) => {
+  try {
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({ msg: 'Acceso denegado' });
+    }
+
+    const targetUser = await User.findById(req.params.userId).select('-password');
+    if (!targetUser) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' });
+    }
+
+    const payload = {
+      user: {
+        id: targetUser.id,
+        nombre: targetUser.nombre,
+        isSuperUser: false,
+        isAdmin: targetUser.isAdmin || false,
+        impersonatedBy: req.user.id,
+      },
+    };
+
+    const token = jwt.sign(payload, process.env.SECRETA, { expiresIn: 43200 });
+
+    console.log(`[IMPERSONATE] Admin ${req.user.id} accedió como usuario ${targetUser.id} (${targetUser.email})`);
+
+    return res.status(200).json({
+      accessToken: token,
+      nombre: targetUser.nombre,
+      id: targetUser.id,
+      email: targetUser.email,
+      impersonated: true,
+    });
+  } catch (error) {
+    console.error('Error en impersonateUser:', error);
+    return res.status(500).json({ msg: 'Error del servidor' });
   }
 };
 

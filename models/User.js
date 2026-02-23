@@ -72,6 +72,10 @@ const UserSchema = new Schema({
       ref: "WindFoilProducts",
     },
   ],
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 //UserSchema.plugin(passportLocalMongoose);

@@ -28,4 +28,7 @@ router.get("/", auth, authController.usuarioAutenticado);
 router.post("/resetPassword", authController.forgotPassword);
 router.post("/changePasswordUser", authController.changePasswordUser);
 
+// Solo admin — acceder como cualquier usuario para soporte
+router.post("/impersonate/:userId", auth, authController.impersonateUser);
+
 module.exports = router;

@@ -49,6 +49,7 @@ app.use("/api/productos", require("./routes/productos")); // PARA MANEJAR LOS PR
 app.use("/api/buscoposts", require("./routes/buscoPost")); //PARA MANEJAR LOS POST DE BUSCO;
 app.use("/api/models", require("./routes/models")); //PARA hacer cambios en bbdd mongodb;
 app.use("/api/favoriteProducts", require("./routes/favoriteProducts"));
+app.use("/api/envios/solicitudes", require("./routes/envioSolicitudes"));
 //3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
 //4 CONECTAMOS A LA BASE DE DATOS
 conectarDB().then(() => {
