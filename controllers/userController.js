@@ -1,6 +1,7 @@
 const User = require("../models/User.js");
 const Avatar = require("../models/Avatar.js");
 const registerEmail = require("../helpers/registerEmail.js");
+const { addContactToAudience, unsubscribeContactFromAudience } = require("../helpers/resendAudience.js");
 const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator"); //usamos esto para validar lo que hemos programado en userRoutes con check
 const jwt = require("jsonwebtoken");
@@ -39,6 +40,9 @@ exports.crearUsuario = async (req, res, next) => {
 
     //Enviar Email de confiramción
     registerEmail({ email, nombre, token: userRegistered._id });
+
+    // Añadir a Resend Audience para emails masivos
+    addContactToAudience(email, nombre);
 
     res.status(200).send({ msg: "usuario creado correctamente" });
   } catch (error) {
@@ -157,6 +161,10 @@ exports.eliminarUsuario = async (req, res) => {
     }
 
     await User.findByIdAndDelete(req.params.id);
+
+    // Desuscribir de Resend Audience
+    unsubscribeContactFromAudience(usuario.email);
+
     res.status(200).send({ msg: "USUARIO ELIMINADO" });
   } catch (err) {
     res.status(500).send("Hubo un Error");

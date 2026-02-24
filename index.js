@@ -50,6 +50,7 @@ app.use("/api/buscoposts", require("./routes/buscoPost")); //PARA MANEJAR LOS PO
 app.use("/api/models", require("./routes/models")); //PARA hacer cambios en bbdd mongodb;
 app.use("/api/favoriteProducts", require("./routes/favoriteProducts"));
 app.use("/api/envios/solicitudes", require("./routes/envioSolicitudes"));
+app.use("/api/admin", require("./routes/admin"));
 //3 ARRAMCAMOS SERVIDOR despues de conectar la base de datos en Mongo
 //4 CONECTAMOS A LA BASE DE DATOS
 conectarDB().then(() => {

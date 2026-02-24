@@ -110,75 +110,89 @@ exports.crearProducto = async (req, res, next) => {
   }
 };
 
+// Tiempo de validez del cache de vistas (24 horas en ms)
+const VISTAS_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// Consulta GA y actualiza el campo vistas en MongoDB (se llama en background)
+async function refrescarVistasDesdeGA(productId) {
+  const analyticsDataClient = getAnalyticsClient();
+  const propertyId = process.env.PROPERTYID;
+
+  const [response] = await analyticsDataClient.runReport({
+    property: `properties/${propertyId}`,
+    dateRanges: [{ startDate: "2024-06-01", endDate: "yesterday" }],
+    dimensions: [{ name: "pagePath" }],
+    metrics: [{ name: "eventCount" }],
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+          {
+            filter: {
+              fieldName: "eventName",
+              stringFilter: { matchType: "EXACT", value: "product_view" },
+            },
+          },
+          {
+            filter: {
+              fieldName: "pagePath",
+              stringFilter: {
+                matchType: "CONTAINS",
+                value: `/productos/${productId}`,
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  const vistas =
+    response.rows?.length > 0
+      ? parseInt(response.rows[0].metricValues[0].value, 10)
+      : 0;
+
+  await Producto.findByIdAndUpdate(productId, {
+    $set: { vistas, vistasActualizadas: new Date() },
+  });
+
+  console.log(`[GA cache] Producto ${productId} → ${vistas} vistas`);
+  return vistas;
+}
+
 // Obtener las vistas de un producto específico cuando se visita su página
 exports.numeroVistasProducto = async (req, res) => {
-  console.log("mueriVistasProducto", req.body);
-  const { productId } = req.body; // ID del producto desde los parámetros de la URL
-  const analyticsDataClient = getAnalyticsClient();
-  const propertyId = process.env.PROPERTYID; // ID de propiedad de Google Analytics
+  const { productId } = req.body;
 
   try {
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [
-        {
-          startDate: "2024-06-01",
-          endDate: "yesterday",
-        },
-      ],
-      dimensions: [
-        { name: "pagePath" }, // Ruta de la página, donde está el ID del producto
-      ],
-      metrics: [
-        { name: "eventCount" }, // Número de veces que se disparó el evento
-      ],
-      dimensionFilter: {
-        andGroup: {
-          expressions: [
-            {
-              filter: {
-                fieldName: "eventName",
-                stringFilter: {
-                  matchType: "EXACT",
-                  value: "product_view", // Filtrar solo por el evento de visualización de producto
-                },
-              },
-            },
-            {
-              filter: {
-                fieldName: "pagePath", // La ruta donde aparece el productId
-                stringFilter: {
-                  matchType: "CONTAINS",
-                  value: `/productos/${productId}`, // Filtrar por el productId en la URL
-                },
-              },
-            },
-          ],
-        },
-      },
-    });
+    // 1. Buscar el valor cacheado en MongoDB (solo los campos necesarios)
+    const producto = await Producto.findById(productId)
+      .select("vistas vistasActualizadas")
+      .lean();
 
-    console.log(
-      `Response rows for product ${productId}:`,
-      response.rows?.length || 0,
-    );
-    console.log("Rows data:", JSON.stringify(response.rows, null, 2));
-
-    // Procesar los resultados para obtener los eventos específicos
-    if (response.rows && response.rows.length > 0) {
-      const evento = response.rows[0];
-      const vistas = parseInt(evento.metricValues[0].value, 10); // Convertir las vistas a número
-      console.log("Número de eventos product_view:", vistas);
-      res.status(200).json({ eventos: vistas });
-    } else {
-      console.log("No se encontraron eventos para el producto:", productId);
-      res.status(200).json({ eventos: 0 });
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
+
+    const ahora = Date.now();
+    const cacheValido =
+      producto.vistasActualizadas &&
+      ahora - new Date(producto.vistasActualizadas).getTime() < VISTAS_CACHE_TTL;
+
+    if (cacheValido) {
+      // Cache válido: respuesta inmediata sin llamar a GA
+      return res.status(200).json({ eventos: producto.vistas || 0 });
+    }
+
+    // Cache expirado: devolver valor actual ahora y actualizar GA en background
+    res.status(200).json({ eventos: producto.vistas || 0 });
+
+    // Actualizar en segundo plano (no bloquea la respuesta)
+    refrescarVistasDesdeGA(productId).catch((err) =>
+      console.error(`[GA cache] Error refrescando producto ${productId}:`, err.message)
+    );
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .send({ error: "Hubo un error al obtener los datos del producto" });
+    res.status(500).json({ error: "Hubo un error al obtener los datos del producto" });
   }
 };
 
@@ -277,7 +291,8 @@ exports.obtenerProductos = async (req, res) => {
       .populate({
         path: "author",
         select: "nombre direccion telefono email imagesAvatar  showPhone",
-      });
+      })
+      .lean();
 
     res.status(200).json({ prodAll, totalProductos, totalPages });
   } catch (error) {
@@ -335,7 +350,8 @@ exports.obtenerProductosAuthor = async (req, res) => {
       .populate({
         path: "author",
         select: "nombre direccion telefono email imagesAvatar  showPhone",
-      });
+      })
+      .lean();
 
     console.log(
       "PRODUCTAUTHOR",
@@ -374,11 +390,13 @@ exports.obtenerProductosAuthorDeleteUser = (id) => {
 //OBTENER PRODUCTO POR ID //TRABAJAMOS SIEMPRE QUE TRY CATCH PARA TENER MÁS SEGURIDAD Y CONTROL
 exports.obtenerProductoId = async (req, res) => {
   try {
-    const productoId = await Producto.findById(req.params.id).populate({
-      path: "author",
-      select:
-        "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
-    });
+    const productoId = await Producto.findById(req.params.id)
+      .populate({
+        path: "author",
+        select:
+          "nombre apellidos dni direccion codigoPostal poblacion_CP telefono email imagesAvatar showPhone",
+      })
+      .lean();
 
     res.json(productoId);
   } catch (error) {
@@ -660,10 +678,12 @@ exports.findProductsByWords = async (req, res) => {
           ],
         },
       ],
-    }).populate({
-      path: "author",
-      select: "nombre direccion telefono email imagesAvatar showPhone",
-    });
+    })
+      .populate({
+        path: "author",
+        select: "nombre direccion telefono email imagesAvatar showPhone",
+      })
+      .lean();
     res.status(200).json({ prodByWords: producto });
   } catch (error) {
     console.log(error);

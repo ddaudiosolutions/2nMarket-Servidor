@@ -9,6 +9,7 @@ const restorePasswordEmail = async (datos) => {
   try {
     const { data, error } = await resend.emails.send({
       from: "WindyMarket <noreply@windymarket.es>",
+      replyTo: process.env.ADMIN_EMAIL,
       to: email,
       subject: "Recupera tu Contraseña",
       html: `<p> Hola: ${nombre}, has solicitado reestablecer tu contraseña para tu cuenta en WindyMarket. </p>

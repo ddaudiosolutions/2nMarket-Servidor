@@ -91,10 +91,20 @@ const windfoilproductSchema = new Schema({
   fechaReactivar: {
     type: Date,
     default: null
+  },
+  vistas: {
+    type: Number,
+    default: 0
+  },
+  vistasActualizadas: {
+    type: Date,
+    default: null
   }
-
-
-
 })
+
+// Índices para acelerar las consultas más frecuentes
+windfoilproductSchema.index({ activo: 1, creado: -1 });
+windfoilproductSchema.index({ activo: 1, categoria: 1, creado: -1 });
+windfoilproductSchema.index({ author: 1, activo: 1 });
 
 module.exports = mongoose.model('WindFoilProducts', windfoilproductSchema)

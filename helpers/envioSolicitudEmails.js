@@ -114,6 +114,7 @@ const enviarEmailClienteConfirmacion = async (solicitud) => {
 
   const { data, error } = await resend.emails.send({
     from: "WindyMarket <noreply@windymarket.es>",
+    replyTo: process.env.ADMIN_EMAIL,
     to: emailRemi,
     subject: "Tu solicitud de envío WindyMarket — Precio confirmado",
     html: `
@@ -186,6 +187,7 @@ const enviarEmailClienteEtiquetas = async (solicitud, attachments) => {
 
   const { data, error } = await resend.emails.send({
     from: "WindyMarket <noreply@windymarket.es>",
+    replyTo: process.env.ADMIN_EMAIL,
     to: emailRemi,
     subject: "TRINIsend — Tus etiquetas de envío",
     html: `

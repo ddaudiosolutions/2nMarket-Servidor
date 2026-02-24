@@ -7,6 +7,7 @@ const registerEmail = async (datos) => {
 
   const { data, error } = await resend.emails.send({
     from: "WindyMarket <noreply@windymarket.es>",
+    replyTo: process.env.ADMIN_EMAIL,
     to: email,
     subject: "Comprueba tu cuenta en WindyMarket",
     html: `<p> Hola: ${nombre}, comprueba tu cuenta en WindyMarket. </p>
