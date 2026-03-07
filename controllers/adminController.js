@@ -15,15 +15,23 @@ exports.emailMasivo = async (req, res) => {
     return res.status(403).json({ msg: "Acceso denegado" });
   }
 
-  const { subject, html } = req.body;
+  const { subject, html, mode } = req.body;
 
   if (!subject || !html) {
     return res.status(400).json({ msg: "subject y html son obligatorios" });
   }
 
-  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (mode !== "sendPro" && mode !== "sendPreview") {
+    return res.status(400).json({ msg: "mode debe ser 'sendPro' o 'sendPreview'" });
+  }
+
+  const audienceId =
+    mode === "sendPro"
+      ? process.env.RESEND_AUDIENCE_ID_PRO
+      : process.env.RESEND_AUDIENCE_ID_PREVIEW;
+
   if (!audienceId) {
-    return res.status(500).json({ msg: "RESEND_AUDIENCE_ID no configurado en .env" });
+    return res.status(500).json({ msg: `RESEND_AUDIENCE_ID_${mode === "sendPro" ? "PRO" : "PREVIEW"} no configurado en .env` });
   }
 
   try {
@@ -43,7 +51,7 @@ exports.emailMasivo = async (req, res) => {
     }
 
     // Enviar el broadcast
-    const { data: sendData, error: sendError } = await resend.broadcasts.send(broadcastData.id);
+    const { error: sendError } = await resend.broadcasts.send(broadcastData.id);
 
     if (sendError) {
       console.error("Error enviando broadcast:", sendError);
