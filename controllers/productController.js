@@ -7,6 +7,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const slugify = require("slugify");
 const { BetaAnalyticsDataClient } = require("@google-analytics/data");
 const getImageDetails = require("../cloudinary/utils.js");
+const publicacionEmail = require("../helpers/publicacionEmail");
+const User = require("../models/User");
 
 // Función auxiliar para crear el cliente de Analytics con credenciales
 const getAnalyticsClient = () => {
@@ -857,5 +859,30 @@ exports.desactivarProducto = async (req, res) => {
   } catch (error) {
     console.error("Error al desactivar el producto:", error);
     res.status(500).send("Error al desactivar el producto");
+  }
+};
+
+exports.emailPublicacion = async (req, res) => {
+  const { productoId } = req.body;
+
+  try {
+    const [producto, usuario] = await Promise.all([
+      Producto.findById(productoId),
+      User.findById(req.user.id).select("email"),
+    ]);
+
+    if (!producto) return res.status(404).json({ msg: "Producto no encontrado" });
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+    await publicacionEmail({
+      email: usuario.email,
+      titulo: producto.title,
+      productoId,
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Error al enviar email de publicación:", error);
+    res.status(500).send("Error al enviar email de publicación");
   }
 };

@@ -75,5 +75,7 @@ router.post('/reactivarProducto', auth, productController.reactivarProducto);
 // DESACTIVAR PRODUCTO
 router.post('/desactivarProducto', auth, productController.desactivarProducto);
 
+// EMAIL DE CONFIRMACION DE PUBLICACION
+router.post('/emailPublicacion', auth, productController.emailPublicacion);
 
 module.exports = router;
